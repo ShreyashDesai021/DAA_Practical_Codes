@@ -1,0 +1,112 @@
+2.
+import java.io.*;
+import java.util.*;
+
+public class QuickSort {
+
+    static String[] title;
+    static double[] rating;
+    static int[] year;
+    static int[] watchCount;
+
+    // --- Swap records at positions i and j ---
+    static void swap(int i, int j) {
+        String t = title[i]; title[i] = title[j]; title[j] = t;
+        double r = rating[i]; rating[i] = rating[j]; rating[j] = r;
+        int y = year[i]; year[i] = year[j]; year[j] = y;
+        int w = watchCount[i]; watchCount[i] = watchCount[j]; watchCount[j] = w;
+    }
+
+    // --- QuickSort using Middle Element as Pivot ---
+    static void quickSort(int low, int high, String c) {
+        if (low >= high) return;
+
+        int mid = (low + high) / 2;
+        double pivot = c.equals("rating") ? rating[mid] :
+                c.equals("year") ? year[mid] : watchCount[mid];
+
+        int i = low, j = high;
+        while (i <= j) {
+            while ((c.equals("rating") ? rating[i] : c.equals("year") ? year[i] : watchCount[i]) < pivot)
+                i++;
+            while ((c.equals("rating") ? rating[j] : c.equals("year") ? year[j] : watchCount[j]) > pivot)
+                j--;
+
+            if (i <= j) {
+                swap(i, j);
+                i++;
+                j--;
+            }
+        }
+
+        quickSort(low, j, c);
+        quickSort(i, high, c);
+    }
+
+    // --- Display Data ---
+    static void display(int n) {
+        for (int i = 0; i < n; i++)
+            System.out.println(title[i] + " | Rating: " + rating[i] +
+                    " | Year: " + year[i] + " | WatchCount: " + watchCount[i]);
+    }
+
+    // --- MAIN FUNCTION ---
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter CSV file path: ");
+        String path = sc.nextLine();
+        int n = 0;
+
+        // Step 1: Count records (excluding header)
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line; boolean first = true;
+            while ((line = br.readLine()) != null) {
+                if (first) { first = false; continue; }
+                if (!line.trim().isEmpty()) n++;
+            }
+        } catch (Exception e) {
+            System.out.println("Error reading file: " + e.getMessage());
+            return;
+        }
+
+        // Step 2: Initialize arrays
+        title = new String[n];
+        rating = new double[n];
+        year = new int[n];
+        watchCount = new int[n];
+
+        // Step 3: Load data from CSV
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line; boolean first = true; int i = 0;
+            while ((line = br.readLine()) != null) {
+                if (first) { first = false; continue; }
+                String[] p = line.split(",");
+                title[i] = p[0].trim();
+                rating[i] = Double.parseDouble(p[1].trim());
+                year[i] = Integer.parseInt(p[2].trim());
+                watchCount[i] = Integer.parseInt(p[3].trim());
+                i++;
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading data: " + e.getMessage());
+            return;
+        }
+
+        // Step 4: Choose sorting attribute
+        System.out.print("Sort by (rating/year/watchcount): ");
+        String c = sc.next().toLowerCase();
+
+        System.out.println("\nBefore Sorting:");
+        display(n);
+
+        // Step 5: Apply QuickSort and measure time
+        long start = System.nanoTime();
+        quickSort(0, n - 1, c);
+        long end = System.nanoTime();
+
+        System.out.println("\nAfter Sorting by " + c.toUpperCase() + ":");
+        display(n);
+
+        System.out.printf("\nTime Taken: %.3f ms\n", (end - start) / 1_000_000.0);
+    }
+}

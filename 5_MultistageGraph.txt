@@ -1,0 +1,143 @@
+5.
+import java.util.*;
+
+class Edge {
+    int to;
+    int cost;
+
+    Edge(int to, int cost) {
+        this.to = to;
+        this.cost = cost;
+    }
+}
+
+public class ShortestRoute {
+
+    // ---------------- FIND SHORTEST PATH (Dynamic Programming) ----------------
+    public static int[] findShortestPath(List<List<Edge>> graph, int N, int source, int destination) {
+        int[] dist = new int[N];
+        int[] nextNode = new int[N];
+
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        Arrays.fill(nextNode, -1);
+
+        dist[destination] = 0;
+
+        // Backward dynamic programming: from last node to first
+        for (int i = N - 2; i >= 0; i--) {
+            for (Edge e : graph.get(i)) {
+                if (dist[e.to] != Integer.MAX_VALUE && e.cost + dist[e.to] < dist[i]) {
+                    dist[i] = e.cost + dist[e.to];
+                    nextNode[i] = e.to;
+                }
+            }
+        }
+
+        return nextNode;
+    }
+
+    // ---------------- DISPLAY ROUTE ----------------
+    public static void displayRoute(int source, int destination, int[] nextNode) {
+        int node = source;
+        System.out.print("Recommended delivery route: ");
+        System.out.print(node);
+        while (nextNode[node] != -1) {
+            node = nextNode[node];
+            System.out.print(" -> " + node);
+        }
+        System.out.println();
+        if (node != destination) {
+            System.out.println("⚠️  Warning: Destination node not reached. Check stage structure or edges.");
+        }
+    }
+
+    // ---------------- MAIN PROGRAM ----------------
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("=== SwiftCargo Logistics Route Optimization System ===");
+        System.out.print("Enter total number of locations (nodes): ");
+        int N = sc.nextInt();
+
+        // Stage assignment for each node
+        int[] stageOf = new int[N];
+        System.out.println("Enter stage index for each node (0 to number_of_stages-1):");
+        for (int i = 0; i < N; i++) {
+            System.out.print("Stage of node " + i + ": ");
+            stageOf[i] = sc.nextInt();
+        }
+
+        List<List<Edge>> graph = new ArrayList<>();
+        for (int i = 0; i < N; i++) graph.add(new ArrayList<>());
+
+        System.out.print("\nEnter number of possible routes (edges): ");
+        int E = sc.nextInt();
+
+        System.out.println("\nEnter each route as: <From> <To> <Cost>");
+        for (int i = 0; i < E; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            int cost = sc.nextInt();
+
+            // Validate that edge connects consecutive stages only
+            if (stageOf[v] - stageOf[u] != 1) {
+                System.out.println("❌ Invalid edge! Edge must connect nodes from consecutive stages (Stage " +
+                        stageOf[u] + " -> Stage " + stageOf[u] + 1 + ")");
+                continue;
+            }
+            graph.get(u).add(new Edge(v, cost));
+        }
+
+        System.out.print("\nEnter starting warehouse (source node): ");
+        int source = sc.nextInt();
+        System.out.print("Enter final delivery point (destination node): ");
+        int destination = sc.nextInt();
+
+        // ---------- Measure only algorithm execution time ----------
+        long startTime = System.nanoTime();
+        int[] nextNode = findShortestPath(graph, N, source, destination);
+        long endTime = System.nanoTime();
+        // ------------------------------------------------------------
+
+        System.out.println("\nAnalyzing delivery routes...");
+        displayRoute(source, destination, nextNode);
+        System.out.println("Route analysis completed successfully.");
+
+        System.out.printf("Total computation time (algorithm only): %.3f milliseconds%n",
+                (endTime - startTime) / 1_000_000.0);
+
+        System.out.println("SwiftCargo system has determined the most efficient delivery path.");
+        sc.close();
+    }
+}
+
+=== SwiftCargo Logistics Route Optimization System ===
+Enter total number of locations (nodes): 6
+Enter stage index for each node (0 to number_of_stages-1):
+Stage of node 0: 0
+Stage of node 1: 1
+Stage of node 2: 1
+Stage of node 3: 2
+Stage of node 4: 2
+Stage of node 5: 3
+
+Enter number of possible routes (edges): 8
+
+Enter each route as: <From> <To> <Cost>
+0 1 2
+0 2 4
+1 3 7
+1 4 3
+2 3 2
+2 4 1
+3 5 1
+4 5 2
+
+Enter starting warehouse (source node): 0
+Enter final delivery point (destination node): 5
+
+Analyzing delivery routes...
+Recommended delivery route: 0 -> 1 -> 4 -> 5
+Route analysis completed successfully.
+Total computation time (algorithm only): 0.255 milliseconds
+SwiftCargo system has determined the most efficient delivery path.

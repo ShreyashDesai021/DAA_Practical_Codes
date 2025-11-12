@@ -1,0 +1,99 @@
+1.
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+class OrderRecord {
+    String code;
+    long time;
+
+    OrderRecord(String code, long time) {
+        this.code = code;
+        this.time = time;
+    }
+}
+
+public class MergeSort {
+
+    // Merge two sorted parts of the list
+    static void merge(List<OrderRecord> list, int left, int mid, int right) {
+        List<OrderRecord> temp = new ArrayList<>();
+        int i = left, j = mid + 1;
+
+        while (i <= mid && j <= right) {
+            if (list.get(i).time <= list.get(j).time) temp.add(list.get(i++));
+            else temp.add(list.get(j++));
+        }
+        while (i <= mid) temp.add(list.get(i++));
+        while (j <= right) temp.add(list.get(j++));
+
+        for (int k = 0; k < temp.size(); k++)
+            list.set(left + k, temp.get(k));
+    }
+
+    // Recursive Merge Sort function
+    static void mergeSort(List<OrderRecord> list, int left, int right) {
+        if (left < right) {
+            int mid = (left + right) / 2;
+            mergeSort(list, left, mid);
+            mergeSort(list, mid + 1, right);
+            merge(list, left, mid, right);
+        }
+    }
+
+    // Display first few sorted orders
+    static void printOrders(List<OrderRecord> list, int count) {
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (int i = 0; i < Math.min(count, list.size()); i++) {
+            String fTime = fmt.format(new Date(list.get(i).time));
+            System.out.println("Order: " + list.get(i).code + " | Time: " + fTime);
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("📦 Customer Order Sorting using Merge Sort");
+        System.out.print("Enter full CSV file path (e.g., C:\\\\Users\\\\Kinjal\\\\Desktop\\\\orders.csv): ");
+        String path = sc.nextLine();
+
+        List<OrderRecord> orders = new ArrayList<>();
+
+        // Read CSV file
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            boolean header = true;
+            while ((line = br.readLine()) != null) {
+                if (header) { header = false; continue; } // skip header
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                if (parts.length < 2) continue;
+
+                String code = parts[0].trim();
+                long time = Long.parseLong(parts[1].trim()); // timestamp in milliseconds
+                orders.add(new OrderRecord(code, time));
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error reading CSV file: " + e.getMessage());
+            return;
+        }
+
+        if (orders.isEmpty()) {
+            System.out.println("⚠️ No valid data found in the file.");
+            return;
+        }
+
+        System.out.println("\nTotal Orders Loaded: " + orders.size());
+        System.out.println("Sorting orders based on timestamp...");
+
+        // Measure sorting time
+        long start = System.currentTimeMillis();
+        mergeSort(orders, 0, orders.size() - 1);
+        long end = System.currentTimeMillis();
+
+        // Show sorted results
+        double sec = (end - start) / 1000.0;
+        System.out.printf("\n✅ Sorting Complete in %.3f seconds\n", sec);
+        System.out.println("\nFirst few sorted orders:");
+        printOrders(orders, 10);
+    }
+}

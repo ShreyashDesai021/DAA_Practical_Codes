@@ -1,0 +1,208 @@
+6.
+import java.util.*;
+
+public class DisasterReliefKnapsackEnhanced {
+
+    static class Item {
+        String name;
+        int weight;
+        int value;
+        double priorityMultiplier;
+
+        public Item(String name, int weight, int value, double priorityMultiplier) {
+            this.name = name;
+            this.weight = weight;
+            this.value = value;
+            this.priorityMultiplier = priorityMultiplier;
+        }
+
+        int effectiveValue() {
+            return (int) Math.round(value * priorityMultiplier);
+        }
+    }
+
+    static int[][] dp;
+
+    // ------------------- Knapsack Memoization -------------------
+    public static int knapsackMemo(Item[] items, int W, int n) {
+        if (n == 0 || W == 0)
+            return 0;
+
+        if (dp[n][W] != -1)
+            return dp[n][W];
+
+        if (items[n - 1].weight > W)
+            dp[n][W] = knapsackMemo(items, W, n - 1);
+        else
+            dp[n][W] = Math.max(
+                    items[n - 1].effectiveValue() + knapsackMemo(items, W - items[n - 1].weight, n - 1),
+                    knapsackMemo(items, W, n - 1)
+            );
+
+        return dp[n][W];
+    }
+
+    // ------------------- Track Selected Items -------------------
+    public static List<Item> getSelectedItems(Item[] items, int W, int n) {
+        List<Item> selected = new ArrayList<>();
+        while (n > 0 && W > 0) {
+            if (dp[n][W] != dp[n - 1][W]) {
+                selected.add(items[n - 1]);
+                W -= items[n - 1].weight;
+            }
+            n--;
+        }
+        return selected;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("=== Disaster Relief Resource Allocation (Enhanced) ===\n");
+
+        System.out.print("Enter total number of items: ");
+        int n = sc.nextInt();
+        sc.nextLine();
+
+        Item[] items = new Item[n];
+
+        for (int i = 0; i < n; i++) {
+            System.out.println("\nEnter details for item " + (i + 1) + ":");
+            System.out.print("Name: ");
+            String name = sc.nextLine();
+
+            System.out.print("Weight (kg): ");
+            int weight = sc.nextInt();
+
+            System.out.print("Utility Value (importance): ");
+            int value = sc.nextInt();
+            sc.nextLine();
+
+            // Priority input: assign higher multiplier to perishable/critical items
+            System.out.print("Priority level (1=Normal, 2=High for Perishable): ");
+            int priorityLevel = sc.nextInt();
+            sc.nextLine();
+
+            double priorityMultiplier = (priorityLevel == 2) ? 1.5 : 1.0; // 50% higher priority
+
+            items[i] = new Item(name, weight, value, priorityMultiplier);
+        }
+
+        System.out.print("\nEnter truck capacity (in kg): ");
+        int truckCapacity = sc.nextInt();
+
+        System.out.print("Enter number of trucks available: ");
+        int totalTrucks = sc.nextInt();
+
+        List<Item> remainingItems = new ArrayList<>(Arrays.asList(items));
+        int truckNumber = 1;
+        double totalUtility = 0;
+
+        // Start algorithm timing
+        long startTime = System.nanoTime();
+
+        while (!remainingItems.isEmpty() && truckNumber <= totalTrucks) {
+            System.out.println("\n-------------------------------------------");
+            System.out.println("Allocating supplies for Truck " + truckNumber);
+            System.out.println("-------------------------------------------");
+
+            Item[] currentItems = remainingItems.toArray(new Item[0]);
+            dp = new int[currentItems.length + 1][truckCapacity + 1];
+            for (int[] row : dp)
+                Arrays.fill(row, -1);
+
+            int maxValue = knapsackMemo(currentItems, truckCapacity, currentItems.length);
+            List<Item> selected = getSelectedItems(currentItems, truckCapacity, currentItems.length);
+
+            if (selected.isEmpty()) {
+                System.out.println("No items could be allocated for this truck.");
+                break;
+            }
+
+            System.out.println("\nItems loaded into Truck " + truckNumber + ":");
+            int usedWeight = 0;
+            for (Item it : selected) {
+                System.out.println(" - " + it.name + " | Weight: " + it.weight +
+                        " | Utility: " + it.value +
+                        " | Priority Multiplier: " + it.priorityMultiplier);
+                usedWeight += it.weight;
+                totalUtility += it.effectiveValue();
+            }
+
+            System.out.println("Total weight in Truck " + truckNumber + ": " + usedWeight + " / " + truckCapacity + " kg");
+            System.out.println("Truck " + truckNumber + " Utility Value: " + maxValue + "\n");
+
+            // Remove selected items from remaining list
+            remainingItems.removeAll(selected);
+            truckNumber++;
+        }
+
+        long endTime = System.nanoTime();
+        double execTime = (endTime - startTime) / 1_000_000.0;
+
+        System.out.println("-------------------------------------------");
+        System.out.println("All truck allocations completed.");
+        System.out.println("Total Combined Utility Value (considering priority): " + totalUtility);
+        System.out.printf("Algorithm Execution Time: %.3f ms\n", execTime);
+        System.out.println("-------------------------------------------");
+
+        sc.close();
+    }
+}
+
+
+=== Disaster Relief Resource Allocation (Enhanced) ===
+
+Enter total number of items: 4
+
+Enter details for item 1:
+Name: a
+Weight (kg): 5
+Utility Value (importance): 50
+Priority level (1=Normal, 2=High for Perishable): 2
+
+Enter details for item 2:
+Name: b
+Weight (kg): 10
+Utility Value (importance): 60
+Priority level (1=Normal, 2=High for Perishable): 1
+
+Enter details for item 3:
+Name: c
+Weight (kg): 8
+Utility Value (importance): 40
+Priority level (1=Normal, 2=High for Perishable): 2
+
+Enter details for item 4:
+Name: d
+Weight (kg): 15
+Utility Value (importance): 90
+Priority level (1=Normal, 2=High for Perishable): 1
+
+Enter truck capacity (in kg): 20
+Enter number of trucks available: 2
+
+-------------------------------------------
+Allocating supplies for Truck 1
+-------------------------------------------
+
+Items loaded into Truck 1:
+ - d | Weight: 15 | Utility: 90 | Priority Multiplier: 1.0
+ - a | Weight: 5 | Utility: 50 | Priority Multiplier: 1.5
+Total weight in Truck 1: 20 / 20 kg
+Truck 1 Utility Value: 165
+
+
+-------------------------------------------
+Allocating supplies for Truck 2
+-------------------------------------------
+
+Items loaded into Truck 2:
+ - c | Weight: 8 | Utility: 40 | Priority Multiplier: 1.5
+ - b | Weight: 10 | Utility: 60 | Priority Multiplier: 1.0
+Total weight in Truck 2: 18 / 20 kg
+Truck 2 Utility Value: 120
+
+-------------------------------------------
+All truck allocations completed.
+Total Combined Utility Value (considering priority): 285.0
+Algorithm Execution Time: 38.301 ms
