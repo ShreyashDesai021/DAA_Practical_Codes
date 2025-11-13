@@ -1,0 +1,2340 @@
+Problem Statement 4:
+🧠 DAA CONCEPTS USED SUMMARY
+Concept	Description
+Graph Representation	Using adjacency list for efficient storage
+Dijkstra’s Algorithm	Greedy algorithm for shortest path in weighted graphs
+Relaxation	Updating distances when shorter paths found
+Priority Queue (Min-Heap)	Ensures next vertex processed has minimum distance
+Path Reconstruction	Backtracking using parent[] array
+Dynamic Graph Updates	Changes edge weights and recomputes routes
+Time Complexity	O((V + E) log V)
+Space Complexity	O(V + E)
+
+✅ My program implements Dijkstra’s algorithm (a Greedy algorithm) to find the shortest path from an ambulance source to the nearest hospital.
+✅ The graph is represented using an adjacency list, where each vertex stores connected edges.
+✅ I use a Priority Queue, implemented as a Min-Heap, to always process the vertex with the smallest distance first.
+✅ Each time a shorter path is found, the relaxation step updates the distance and parent arrays.
+✅ After the shortest distances are computed, the path is reconstructed using the parent[] array.
+✅ The program also supports dynamic updates, allowing real-time traffic weight changes and re-running Dijkstra’s algorithm.
+✅ The time complexity of this approach is O((V + E) log V), and the space complexity is O(V + E).
+
+🚦 NEAREST HOSPITAL SYSTEM — COMPLETE EXECUTION FLOW
+We will use this input (0-based indexing as used in your program):
+Enter vertices and edges: 6 8
+Enter edges (u v w):
+0 1 4
+0 2 2
+1 3 3
+2 3 1
+2 4 7
+3 5 5
+4 5 1
+1 4 8
+
+Enter source: 0
+Enter number of hospitals: 2
+Enter hospital nodes:
+4 5
+
+Enter number of traffic updates: 0
+________________________________________
+🧩 STEP 1 — Program Starts, Scanner Created
+Program begins inside main():
+Scanner sc = new Scanner(System.in);
+User enters:
+6 8
+✔ V = 6 → total vertices (0 to 5)
+✔ E = 8 → total edges
+________________________________________
+🧩 STEP 2 — Graph Initialization
+List<Edge>[] g = new ArrayList[V];
+for (int i = 0; i < V; i++) g[i] = new ArrayList<>();
+Creates an adjacency list with 6 empty lists:
+g[0] = []
+g[1] = []
+g[2] = []
+g[3] = []
+g[4] = []
+g[5] = []
+________________________________________
+🧩 STEP 3 — Reading Graph Edges
+User enters:
+0 1 4
+0 2 2
+1 3 3
+2 3 1
+2 4 7
+3 5 5
+4 5 1
+1 4 8
+For each input:
+g[u].add(new Edge(v, w));
+g[v].add(new Edge(u, w));
+Graph becomes:
+Node	Edges (dest, wt)
+0	(1,4), (2,2)
+1	(0,4), (3,3), (4,8)
+2	(0,2), (3,1), (4,7)
+3	(1,3), (2,1), (5,5)
+4	(2,7), (5,1), (1,8)
+5	(3,5), (4,1)
+________________________________________
+🧩 STEP 4 — Read Ambulance Source
+User enters:
+source = 0
+________________________________________
+🧩 STEP 5 — Read Hospital Nodes
+User enters:
+2
+4 5
+✔ Hospital nodes = {4, 5}
+________________________________________
+🧩 STEP 6 — Call nearestHospital()
+nearestHospital(g, 0, [4,5]);
+Inside the function:
+int[] parent = new int[g.length];
+int[] dist = dijkstra(g, src, parent);
+We now run Dijkstra’s Algorithm.
+________________________________________
+🚀 STEP 7 — DIJKSTRA STARTS
+✔ Initialization:
+dist[]   = [0, ∞, ∞, ∞, ∞, ∞]
+parent[] = [-1, -1, -1, -1, -1, -1]
+vis[]    = [F, F, F, F, F, F]
+PQ       = [(0,0)]
+________________________________________
+🔁 ITERATION 1
+PQ:
+[(0,0)]
+POP:
+cur = (0,0)
+vis[0] = true
+Neighbors of 0:
+	1 (wt=4)
+	2 (wt=2)
+Relax 0 → 1:
+dist[1] = 4
+parent[1] = 0
+PQ = [(1,4)]
+Relax 0 → 2:
+dist[2] = 2
+parent[2] = 0
+PQ = [(2,2), (1,4)]
+________________________________________
+🔁 ITERATION 2
+PQ:
+[(2,2), (1,4)]
+POP:
+cur = (2,2)
+vis[2] = true
+Neighbors:
+	0 skip
+	3 (wt=1)
+	4 (wt=7)
+Relax 2 → 3:
+dist[3] = 2 + 1 = 3
+parent[3] = 2
+PQ = [(3,3), (1,4)]
+Relax 2 → 4:
+dist[4] = 2 + 7 = 9
+parent[4] = 2
+PQ = [(3,3), (1,4), (4,9)]
+________________________________________
+🔁 ITERATION 3
+PQ:
+[(3,3), (1,4), (4,9)]
+POP:
+cur = (3,3)
+vis[3] = true
+Relax neighbors:
+	1 (wt=3)
+	5 (wt=5)
+Relax 3 → 5:
+dist[5] = 3 + 5 = 8
+parent[5] = 3
+PQ = [(1,4), (4,9), (5,8)]
+________________________________________
+🔁 ITERATION 4
+PQ:
+[(1,4), (5,8), (4,9)]
+POP:
+cur = (1,4)
+vis[1] = true
+Relax neighbors → no shorter distance found.
+________________________________________
+🔁 ITERATION 5
+PQ:
+[(5,8), (4,9)]
+POP:
+cur = (5,8)
+vis[5] = true
+Relax neighbors:
+	4 via 5 → 8+1=9 (same)
+________________________________________
+🔁 ITERATION 6
+PQ:
+[(4,9)]
+POP:
+cur = (4,9)
+vis[4] = true
+Relax neighbors → no change.
+________________________________________
+🟩 DIJKSTRA FINISHED
+Final results:
+dist[]   = [0, 4, 2, 3, 9, 8]
+parent[] = [-1, 0, 0, 2, 2, 3]
+________________________________________
+🧩 STEP 8 — NEAREST HOSPITAL CHECK
+Hospitals = {4, 5}
+Hospital	Distance
+4	9
+5	8
+✔ Minimum = 8
+✔ Nearest Hospital = 5
+________________________________________
+🧩 STEP 9 — RECONSTRUCT PATH
+Destination = 5
+5 ← parent[5] = 3
+3 ← parent[3] = 2
+2 ← parent[2] = 0
+0 ← parent[0] = -1 (stop)
+Reverse:
+[0 → 2 → 3 → 5]
+________________________________________
+🟩 FINAL OUTPUT
+The program prints:
+Nearest hospital: 5 | Time: 8
+Path: [0, 2, 3, 5]
+No traffic updates (user entered 0), so program ends.
+________________________________________
+🎉 FINAL SUMMARY (for Viva)
+✔ Program takes graph input using adjacency list
+✔ Uses Dijkstra’s Algorithm (Greedy shortest path)
+✔ Uses PriorityQueue (Min-Heap) to always pick smallest distance
+✔ Applies relaxation on every edge
+✔ Computes shortest distance to ALL nodes
+✔ Compares distances of hospital nodes
+✔ Picks nearest hospital
+✔ Reconstructs path using parent[]
+✔ Outputs shortest time and path
+✔ Correct output:
+Nearest hospital: 5 | Time: 8
+Path: [0, 2, 3, 5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROBLEM STATEMENT 8:
+📘 DAA Concepts Used
+Concept	Explanation
+Branch and Bound	Used to prune high-cost paths early by bounding partial solutions.
+Bounding Function	Estimates lower bound using firstMin and secondMin functions.
+State Space Tree	Each level represents a city visit. Each node represents a partial path.
+Backtracking	Reverts path to explore alternate routes.
+Optimal Substructure	Best solution built from best subpaths.
+NP-Hard Problem	No polynomial-time solution exists for TSP.
+________________________________________
+💻 JAA Concepts Used
+Concept	Description
+Class & Static Members	For shared variables across recursion.
+Recursion	Core technique for exploring paths.
+Arrays & ArrayLists	Storing cost matrix and paths.
+Control Structures	Loops, conditions, recursion, backtracking.
+System.nanoTime()	Measures time complexity experimentally.
+Scanner Class	Input handling.
+Collections Framework	For managing dynamic lists.
+________________________________________
+⏱️ Time Complexity
+	Worst-case: O(N!) (like brute-force)
+	Average-case (due to pruning): Significantly reduced (depends on cost matrix)
+💾 Space Complexity
+	O(N²) for cost matrix
+	O(N) for recursion stack and path
+📘 DAA Concepts Used
+Concept	Explanation
+Branch and Bound	Used to prune high-cost paths early by bounding partial solutions.
+Bounding Function	Estimates lower bound using firstMin and secondMin functions.
+State Space Tree	Each level represents a city visit. Each node represents a partial path.
+Backtracking	Reverts path to explore alternate routes.
+Optimal Substructure	Best solution built from best subpaths.
+NP-Hard Problem	No polynomial-time solution exists for TSP.
+________________________________________
+💻 JAA Concepts Used
+Concept	Description
+Class & Static Members	For shared variables across recursion.
+Recursion	Core technique for exploring paths.
+Arrays & ArrayLists	Storing cost matrix and paths.
+Control Structures	Loops, conditions, recursion, backtracking.
+System.nanoTime()	Measures time complexity experimentally.
+Scanner Class	Input handling.
+Collections Framework	For managing dynamic lists.
+________________________________________
+⏱️ Time Complexity
+	Worst-case: O(N!) (like brute-force)
+	Average-case (due to pruning): Significantly reduced (depends on cost matrix)
+💾 Space Complexity
+	O(N²) for cost matrix
+	O(N) for recursion stack and path
+	🔹 13. Important Viva Questions
+Question	Short Answer
+What is TSP?	A problem to find the shortest possible route visiting all cities once and returning to origin.
+What is meant by NP-hard?	Problems for which no known polynomial-time solution exists.
+Why use Branch and Bound?	To avoid exploring costly paths early using lower bounds.
+What is the role of firstMin and secondMin?	They estimate the least possible edge cost for bounding.
+What does “bound” mean here?	A lower estimated cost of the partial path — used to prune unpromising paths.
+What is the difference between backtracking and branch & bound?	Backtracking eliminates infeasible paths; branch & bound eliminates non-optimal paths.
+What data structures are used?	2D array for costs, boolean array for visited, ArrayList for path.
+What is the time complexity?	O(N!) in worst case.
+What kind of recursion is used?	Depth-first search recursion.
+
+High-level execution flow (start → finish)
+	Program start
+	main() begins execution.
+	Input
+	Program prints Enter number of cities: → user inputs N.
+	Program allocates cost = new int[N][N].
+	Program prompts Enter cost matrix → user enters an N×N matrix (0 = no direct path / self-loop).
+	Edge case check
+	If N == 1 → print cost 0 and route [0] and exit.
+	Initial setup in tsp()
+	currBound = 0.
+	visited = new boolean[N] (all false initially).
+	currPath = new ArrayList<>().
+	Compute initial lower bound:
+	For each city i compute firstMin(cost,i) and secondMin(cost,i) and add them to currBound.
+	After sum over all cities, divide by 2 (round up if odd).
+	Set visited[0] = true, currPath.add(0) (start at city 0).
+	Call tspRec(cost, currBound, currWeight=0, level=1, visited, currPath).
+	Recursive exploration: tspRec(...)
+	Base case: if level == N:
+	Check if return edge from last city to start exists (cost[last][0] != 0).
+	currRes = currWeight + cost[last][0].
+	If currRes < finalCost → update finalCost and bestPath (copy currPath and add start).
+	Return (backtrack).
+	Otherwise (branching):
+	For each city i = 0..N-1:
+	If cost[last][i] != 0 and visited[i] is false:
+	Save temp = currBound.
+	currWeight += cost[last][i] (include chosen edge).
+	Update currBound using firstMin/secondMin:
+	If level == 1: use (firstMin(last) + firstMin(i))/2.
+	Else: use (secondMin(last) + firstMin(i))/2.
+	Subtract that from currBound (this tightens the bound).
+	Prune check: if (currBound + currWeight) < finalCost:
+	Accept branch → currPath.add(i), visited[i]=true, recurse with level+1.
+	Backtrack:
+	currWeight -= cost[last][i]
+	currBound = temp
+	visited[i] = false
+	remove last added city from currPath if present
+	Continue loop for other i.
+	Return to previous recursion frame when loop done.
+	Completion
+	tspRec unwinds fully back to tsp().
+	Program prints bestPath and finalCost.
+	Prints time taken using System.nanoTime() difference.
+	main() ends.
+________________________________________
+Key variables and what they represent at runtime
+	N — number of cities.
+	cost[][] — adjacency matrix with travel costs.
+	finalCost — global best (minimum) tour cost found so far (initially ∞).
+	bestPath — list storing best route found (including return to start).
+	visited[] — boolean array marking visited cities in the current branch.
+	currPath — the current path stack (sequence of cities visited in current branch).
+	currBound — lower bound estimate on the total tour cost for current branch.
+	currWeight — exact total cost of edges chosen so far along current path.
+	level — number of cities already in currPath (1 means only start city).
+	temp — saved currBound used to restore after trying a branch.
+________________________________________
+Concrete trace (4-city example)
+Use the cost matrix:
+  0   10  15  20
+ 10   0   35  25
+ 15  35   0   30
+ 20  25  30   0
+Cities: 0,1,2,3
+Step A — compute initial lower bound
+For each city:
+	firstMin(0) = 10, secondMin(0) = 15 → sum = 25
+	firstMin(1) = 10, secondMin(1) = 25 → sum = 35
+	firstMin(2) = 15, secondMin(2) = 30 → sum = 45
+	firstMin(3) = 20, secondMin(3) = 25 → sum = 45
+Total sum = 25 + 35 + 45 + 45 = 150 → currBound = 150/2 = 75.
+Initial state before recursion:
+	currBound = 75
+	currWeight = 0
+	visited = [true, false, false, false] (we start at city 0)
+	currPath = [0]
+	finalCost = ∞
+________________________________________
+Step B — level 1 (from city 0), loop tries edges 0→1, 0→2, 0→3
+Try 0 → 1
+	temp = 75
+	currWeight += cost[0][1] = 10 → currWeight = 10
+	Since level == 1: update bound by subtracting (firstMin(0)+firstMin(1))/2 = (10+10)/2 = 10 → currBound = 75 - 10 = 65
+	Prune check: currBound + currWeight = 65 + 10 = 75 < finalCost (∞) → explore
+	Update state: currPath = [0,1], visited = [true,true,false,false]
+	Recurse into tspRec(..., level=2)
+________________________________________
+Step C — level 2 (from city 1), try 1→2 and 1→3 (0 visited)
+Try 1 → 2
+	temp = 65
+	currWeight += cost[1][2] = 35 → currWeight = 45
+	level != 1 so subtract (secondMin(1)+firstMin(2))/2 = (25+15)/2 = 20 → currBound = 65 - 20 = 45
+	Prune check: currBound + currWeight = 45 + 45 = 90 < ∞ → explore
+	currPath = [0,1,2], visited = [t,t,t,f], recurse level=3
+________________________________________
+Step D — level 3 (from city 2), only unvisited is 3
+	Try 2 → 3:
+	temp = 45
+	currWeight += cost[2][3] = 30 → currWeight = 75
+	subtract (secondMin(2)+firstMin(3))/2 = (30+20)/2 = 25 → currBound = 45 - 25 = 20
+	Prune check: currBound + currWeight = 20 + 75 = 95 < ∞ → explore
+	currPath = [0,1,2,3], visited = [t,t,t,t], recurse level=4 → now level == N (base case)
+Base case: evaluate complete tour
+	Add return cost cost[3][0] = 20 → currRes = currWeight + 20 = 75 + 20 = 95
+	95 < finalCost(∞) → update finalCost = 95, bestPath = [0,1,2,3,0]
+	Return to previous frame (backtrack)
+	Restore variables: currWeight back to 75 - 30 = 45, currBound = 45, visited[3] = false, currPath remove last → [0,1,2]
+________________________________________
+Backtrack to level 2
+	After trying 1→2, now try 1→3
+	From state at level 2 initial: currWeight was 10 (before trying 1→2), currBound was 65 originally at level 2
+Try 1 → 3
+	temp = 65
+	currWeight += cost[1][3] = 25 → currWeight = 35
+	subtract (secondMin(1)+firstMin(3))/2 = (25+20)/2 = 22 (integer truncation note: in Java ints -> 22) → currBound = 65 - 22 = 43
+	Prune check: 43 + 35 = 78 < finalCost(95) → explore
+	currPath = [0,1,3], visited = [t,t,f,t], recurse level=3
+At level 3 from city 3 → only unvisited is 2
+	Try 3→2:
+	currWeight += cost[3][2] = 30 → currWeight = 65
+	subtract (secondMin(3)+firstMin(2))/2 = (25+15)/2 = 20 → currBound = 43 - 20 = 23
+	23 + 65 = 88 < finalCost(95) → explore
+	Recurse level=4 (all visited)
+	Base case: add return cost cost[2][0]=15 → currRes = 65 + 15 = 80
+	80 < finalCost(95) → update finalCost = 80, bestPath = [0,1,3,2,0]
+	Backtrack after level 3 → restore currWeight to 35, currBound to 43, visited[2] = false, currPath = [0,1,3]
+	No other unvisited at level 3 → backtrack to level 2, restore currWeight = 10, currBound = 65, visited[3]=false, currPath=[0,1]
+________________________________________
+Backtrack to level 1
+	After exploring 0→1 branch fully, continue top loop at level 1 to try 0→2 and 0→3 (but now finalCost = 80, so pruning becomes more effective).
+Try 0 → 2
+	temp = 75
+	currWeight += cost[0][2] = 15 → currWeight = 15
+	since level==1 subtract (firstMin(0)+firstMin(2))/2 = (10+15)/2 = 12 (int) → currBound = 75 - 12 = 63
+	Check 63 + 15 = 78 < finalCost(80) → explore
+	Recurse level=2 from path [0,2]
+Level 2 from city 2, try 2→1 and 2→3
+	Try 2→1:
+	currWeight = 15 + 35 = 50
+	subtract (secondMin(2)+firstMin(1))/2 = (30+10)/2 = 20 → currBound = 63 - 20 = 43
+	43 + 50 = 93 ≥ finalCost(80) → PRUNE this branch (do not recurse)
+	Try 2→3:
+	currWeight = 15 + 30 = 45
+	subtract (secondMin(2)+firstMin(3))/2 = (30+20)/2 = 25 → currBound = 63 - 25 = 38
+	38 + 45 = 83 ≥ finalCost(80) → PRUNE
+	Both sub-branches pruned → backtrack to level 1 restore currWeight=0 etc.
+Try 0 → 3
+	temp = 75
+	currWeight = 20
+	subtract (firstMin(0)+firstMin(3))/2 = (10+20)/2 = 15 → currBound = 75 - 15 = 60
+	60 + 20 = 80 == finalCost(80) → condition is < finalCost in code, so NOT explored (tie is not allowed) — it will be pruned.
+	End loop at level 1.
+________________________________________
+Finish
+	All branches explored/pruned. bestPath = [0,1,3,2,0], finalCost = 80.
+	Print results and time.
+________________________________________
+Important exam points (short)
+	Branching: at each node we try unvisited cities; depth = number visited.
+	Bounding: currBound + currWeight is a provable lower bound for any completion of current partial path; if ≥ finalCost we prune.
+	Why first/second mins: gives a fast, conservative lower bound using local cheapest outgoing edges.
+	Backtracking: after returning from recursion you must restore currWeight, currBound and visited[] so other siblings are explored correctly.
+	Pruning effectiveness increases after you find a good finalCost early (then many branches get cut).
+	Edge cases: zero entries mean no direct path — code checks cost[last][i] != 0.
+________________________________________
+Quick visual of one recursion stack (when best path was found)
+Frame L1: level=1 path [0], currBound=75, currWeight=0
+→ choose 1 → push frame
+Frame L2: level=2 path [0,1], currBound=65, currWeight=10
+→ choose 3 → push frame
+Frame L3: level=3 path [0,1,3], currBound=43, currWeight=35
+→ choose 2 → push frame
+Frame L4: level=4 path [0,1,3,2], currWeight=65 → base case → evaluate and update finalCost=80 → pop L4 → restore L3 → continue/backtrack
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+POBLEM STATEMENT 5:
+🧠 DAA CONCEPTS INVOLVED
+Concept	Meaning
+Graph Theory	Data structure to represent nodes (cities) and edges (routes).
+Multistage Graph	Graph divided into ordered stages — edges only go from stage i → i+1.
+Dynamic Programming (DP)	Optimization strategy solving complex problems by combining results of subproblems.
+Shortest Path Problem	Find minimal cost between source and destination.
+Algorithm Efficiency	Uses DP, not brute force, hence O(V + E) per stage.
+Real-Time Update	Demonstrates dynamic edge weight modification without reconstructing the graph.
+Algorithm Time Measurement	Uses System.nanoTime() to measure execution time precisely.
+
+⚙️ DAA CONCEPTS USED:
+Concept	Meaning
+Graph Representation	The delivery network is modeled as a graph (nodes = locations, edges = routes).
+Directed Acyclic Graph (DAG)	Routes only go forward (no cycles).
+Dynamic Programming (DP)	Solves the shortest path problem stage by stage from the end node backward.
+Optimal Substructure	The best path from node i depends on best paths from its next connected nodes.
+Time Complexity:	O(V + E) — efficient for multistage networks.
+Space Complexity:	O(V).
+
+📈 FLOWCHART SUMMARY
+ ┌────────────────────────┐
+ │ Start Program          │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Input N, E, routes     │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Build adjacency list   │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Input source, dest     │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Initialize dist[], DP  │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Compute shortest paths │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ Display route, time    │
+ └────────┬───────────────┘
+          │
+ ┌────────▼───────────────┐
+ │ End Program            │
+ └────────────────────────┘
+________________________________________
+📚 VIVA-READY QUESTIONS
+Sr	Question	Answer
+1	What algorithm is used here?	Dynamic Programming on Directed Acyclic Graph
+2	What data structure is used for graph?	Adjacency List
+3	Why is Dynamic Programming used?	To avoid recomputation and efficiently find minimal cost from subproblems.
+4	What is Integer.MAX_VALUE?	A large constant (2³¹−1) used to represent infinity.
+5	What is the time complexity?	O(V + E)
+6	What does System.nanoTime() do?	Measures precise execution time in nanoseconds.
+7	Why do we use Arrays.fill()?	To quickly assign same value (infinity) to all array elements.
+8	Is this a recursive or iterative DP?	Iterative (bottom-up approach).
+9	What is meant by DAG?	Directed Acyclic Graph — no cycles.
+10	What is the base case in this DP?	Distance from destination node to itself is 0.
+11	What does nextNode[] store?	The next node to go to on the shortest route.
+12	What Java feature allows us to group graph edges?	Classes and Objects (Encapsulation).
+13	Why use List<List<Edge>>?	To store variable-length adjacency lists dynamically.
+14	What happens if a cycle exists?	DP logic breaks — works only for acyclic graphs.
+15	Can this handle negative weights?	Yes, if no negative cycle exists.
+16	What is the advantage of DP over Dijkstra here?	DP is simpler when the graph has fixed stages.
+17	What is public static void main()?	Entry point of Java program.
+18	Why close Scanner?	To free system resources.
+19	What are the nodes and edges in this problem?	Locations and routes in SwiftCargo’s delivery network.
+20	Application of this algorithm?	Logistics routing, project scheduling, pipeline processing.
+________________________________________
+✅ FINAL CONCLUSION (Exam Summary)
+Aspect	Details
+Problem Type	Shortest Path in Multistage Graph
+Algorithm	Dynamic Programming (Backward Approach)
+Data Structure	Adjacency List using ArrayList
+Input	Nodes, Edges, Source, Destination
+Output	Minimum-cost delivery route
+Complexity	O(V + E)
+Real-World Use	Logistics, Network Optimization, Transport Routing
+Java Concepts Used	Classes, Objects, Static methods, Arrays, Lists, Scanner, Encapsulation, Iteration
+
+Mehul code:
+🧠 CONCEPT SUMMARY TABLE
+Concept	Explanation
+Graph Representation	Adjacency List (List<List<Edge>>)
+Multistage Property	Edge only from Stage i → Stage i+1
+Dynamic Programming	Bottom-up computation of shortest path
+Optimal Substructure	dist[i] = min(cost(i→j) + dist[j])
+Infinity Concept	Represented by Integer.MAX_VALUE
+Time Complexity	O(V + E)
+Space Complexity	O(V)
+Java OOP	Encapsulation via Edge class
+Performance Measurement	System.nanoTime()
+Input Handling	Scanner class from java.util
+________________________________________
+🧾 10 Viva-Ready Questions (with crisp answers)
+No	Question	Answer
+1	What type of algorithm is this?	Dynamic Programming (Backward approach)
+2	What is a Multistage Graph?	A DAG where edges only go from one stage to the next consecutive stage.
+3	What is dist[i]?	The minimum cost from node i to destination.
+4	What is nextNode[i]?	The next node to go to from node i on the shortest route.
+5	Why do we fill dist[] with Integer.MAX_VALUE?	To represent infinity (unreachable nodes).
+6	What ensures multistage structure?	Stage validation (stageOf[v] - stageOf[u] == 1)
+7	What is the time complexity?	O(V + E)
+8	Why is DP efficient here?	It avoids recomputation by storing subproblem results.
+9	Why measure time with nanoTime()?	Gives precise algorithm execution time.
+10	Can this graph have backward edges?	No, because it’s a Directed Acyclic Multistage Graph.
+
+🚀 PROGRAM EXECUTION FLOW: From Input → Output
+________________________________________
+🟢 STEP 1: Program Starts
+public static void main(String[] args)
+	JVM starts execution here.
+	main() acts as the entry point of every Java program.
+________________________________________
+🟢 STEP 2: Scanner Object Created
+Scanner sc = new Scanner(System.in);
+	Scanner is used to take keyboard input from the user.
+	Java reads input stream (System.in) and parses it into integers.
+________________________________________
+🟢 STEP 3: Welcome Message Printed
+System.out.println("=== SwiftCargo Logistics Route Optimization System ===");
+	Displays title for the user to understand the context.
+________________________________________
+🟢 STEP 4: Input — Number of Locations (Nodes)
+System.out.print("Enter total number of locations (nodes): ");
+int N = sc.nextInt();
+Example Input:
+6
+Meaning: There are 6 nodes (locations) in the logistics network, numbered 0 to 5.
+________________________________________
+🟢 STEP 5: Input — Stage Index for Each Node
+int[] stageOf = new int[N];
+System.out.println("Enter stage index for each node (0 to number_of_stages-1):");
+for (int i = 0; i < N; i++) {
+    System.out.print("Stage of node " + i + ": ");
+    stageOf[i] = sc.nextInt();
+}
+Example Input:
+Stage of node 0: 0
+Stage of node 1: 1
+Stage of node 2: 1
+Stage of node 3: 2
+Stage of node 4: 2
+Stage of node 5: 3
+Node	Stage
+0	0
+1	1
+2	1
+3	2
+4	2
+5	3
+DAA Concept:
+The graph is divided into stages — edges must connect consecutive stages only (0→1, 1→2, 2→3).
+________________________________________
+🟢 STEP 6: Create Adjacency List (Graph Structure)
+List<List<Edge>> graph = new ArrayList<>();
+for (int i = 0; i < N; i++) graph.add(new ArrayList<>());
+Resulting Data Structure:
+graph = [ [], [], [], [], [], [] ]
+Each node (0–5) has an empty list to store outgoing edges.
+DAA Concept:
+Graph represented using an Adjacency List —
+efficient for sparse networks (less memory than matrix).
+________________________________________
+🟢 STEP 7: Input — Number of Routes (Edges)
+System.out.print("\nEnter number of possible routes (edges): ");
+int E = sc.nextInt();
+Example Input:
+8
+________________________________________
+🟢 STEP 8: Input — Each Route (Edge)
+System.out.println("\nEnter each route as: <From> <To> <Cost>");
+for (int i = 0; i < E; i++) {
+    int u = sc.nextInt();
+    int v = sc.nextInt();
+    int cost = sc.nextInt();
+Example Input:
+0 1 2
+0 2 4
+1 3 7
+1 4 3
+2 3 2
+2 4 1
+3 5 1
+4 5 2
+Now the code validates whether each edge connects consecutive stages:
+if (stageOf[v] - stageOf[u] != 1) {
+    System.out.println("❌ Invalid edge! ...");
+    continue;
+}
+graph.get(u).add(new Edge(v, cost));
+✅ All edges above are valid (Stage i → Stage i+1).
+❌ If user entered 2 5 3, it would print:
+Invalid edge! Edge must connect nodes from consecutive stages (Stage 1 -> Stage 2)
+________________________________________
+🟢 STEP 9: Constructed Graph in Memory
+After valid inputs, adjacency list looks like this:
+graph = [
+  [Edge(1,2), Edge(2,4)],   // From node 0
+  [Edge(3,7), Edge(4,3)],   // From node 1
+  [Edge(3,2), Edge(4,1)],   // From node 2
+  [Edge(5,1)],              // From node 3
+  [Edge(5,2)],              // From node 4
+  []                        // Node 5 (destination)
+]
+DAA Concept:
+Edges are directional, following the multistage constraint —
+making the graph a Directed Acyclic Graph (DAG).
+________________________________________
+🟢 STEP 10: Input — Source and Destination Nodes
+System.out.print("\nEnter starting warehouse (source node): ");
+int source = sc.nextInt();
+System.out.print("Enter final delivery point (destination node): ");
+int destination = sc.nextInt();
+Example Input:
+Source: 0
+Destination: 5
+________________________________________
+🟢 STEP 11: Measure Algorithm Execution Time
+long startTime = System.nanoTime();
+int[] nextNode = findShortestPath(graph, N, source, destination);
+long endTime = System.nanoTime();
+	startTime = time before algorithm runs.
+	endTime = time after completion.
+We now jump to the findShortestPath() function 👇
+________________________________________
+🧮 INSIDE findShortestPath()
+Step A: Initialize Arrays
+int[] dist = new int[N];
+int[] nextNode = new int[N];
+Arrays.fill(dist, Integer.MAX_VALUE);
+Arrays.fill(nextNode, -1);
+dist[destination] = 0;
+Initial values:
+dist = [∞, ∞, ∞, ∞, ∞, 0]
+nextNode = [-1, -1, -1, -1, -1, -1]
+Meaning:
+	Destination (node 5) has cost = 0.
+	All others = unknown yet (∞).
+________________________________________
+Step B: Backward Dynamic Programming Loop
+for (int i = N - 2; i >= 0; i--) {
+    for (Edge e : graph.get(i)) {
+        if (dist[e.to] != Integer.MAX_VALUE && e.cost + dist[e.to] < dist[i]) {
+            dist[i] = e.cost + dist[e.to];
+            nextNode[i] = e.to;
+        }
+    }
+}
+Let’s compute step by step 👇
+________________________________________
+1️⃣ i = 4
+Edges: (4→5, cost=2)
+dist[4] = min(∞, 2 + dist[5]=2+0) = 2
+nextNode[4] = 5
+2️⃣ i = 3
+Edges: (3→5, cost=1)
+dist[3] = 1 + dist[5]=1
+nextNode[3] = 5
+3️⃣ i = 2
+Edges: (2→3,2), (2→4,1)
+	via 3: 2 + 1 = 3
+	via 4: 1 + 2 = 3
+Both same → picks first found.
+dist[2] = 3
+nextNode[2] = 3 (or 4 depending order)
+4️⃣ i = 1
+Edges: (1→3,7), (1→4,3)
+	via 3: 7 + 1 = 8
+	via 4: 3 + 2 = 5
+Choose 5.
+dist[1] = 5
+nextNode[1] = 4
+5️⃣ i = 0
+Edges: (0→1,2), (0→2,4)
+	via 1: 2 + 5 = 7
+	via 2: 4 + 3 = 7
+Pick 7 (both equal).
+dist[0] = 7
+nextNode[0] = 1
+________________________________________
+Step C: Final DP Tables
+Node	dist[i] (Min Cost)	nextNode[i]
+0	7	1
+1	5	4
+2	3	3
+3	1	5
+4	2	5
+5	0	-1
+________________________________________
+Step D: Return Path Data
+return nextNode;
+Control returns to main(), carrying the chain of next nodes.
+________________________________________
+🧩 BACK TO MAIN()
+Now:
+nextNode = [1, 4, 3, 5, 5, -1]
+________________________________________
+🟢 STEP 12: Display Route
+System.out.println("\nAnalyzing delivery routes...");
+displayRoute(source, destination, nextNode);
+Let’s enter displayRoute() 👇
+________________________________________
+🗺️ INSIDE displayRoute()
+int node = source;
+System.out.print("Recommended delivery route: ");
+System.out.print(node);
+while (nextNode[node] != -1) {
+    node = nextNode[node];
+    System.out.print(" -> " + node);
+}
+Flow:
+	Start from node = 0
+	nextNode[0] = 1 → print “0 -> 1”
+	nextNode[1] = 4 → print “1 -> 4”
+	nextNode[4] = 5 → print “4 -> 5”
+	nextNode[5] = -1 → stop.
+Output:
+Recommended delivery route: 0 -> 1 -> 4 -> 5
+________________________________________
+Check Destination
+if (node != destination) {
+    System.out.println("⚠️  Warning: Destination node not reached.");
+}
+✅ Here, node == destination, so no warning.
+________________________________________
+🔁 BACK TO MAIN AGAIN
+________________________________________
+🟢 STEP 13: Print Confirmation and Time
+System.out.println("Route analysis completed successfully.");
+System.out.printf("Total computation time (algorithm only): %.3f milliseconds%n",
+        (endTime - startTime) / 1_000_000.0);
+System.out.println("SwiftCargo system has determined the most efficient delivery path.");
+Time Calculation:
+(endTime - startTime) / 1_000_000.0
+→ Converts nanoseconds → milliseconds.
+Example:
+Total computation time (algorithm only): 0.028 milliseconds
+________________________________________
+🟢 STEP 14: Close Scanner and End
+sc.close();
+Releases system resources.
+⚙️ SUMMARY OF DATA FLOW
+Step	Description	Concept
+1	User inputs nodes & stages	Graph definition
+2	Edges added (validated by stage)	Directed acyclic structure
+3	findShortestPath() runs	Dynamic Programming
+4	dist[] computed backward	Optimal substructure
+5	nextNode[] built	Path reconstruction
+6	Path printed	Output route
+7	Time calculated	Performance measurement
+
+
+
+PROBLEM STATEMENT 3:
+🧠 DAA Concepts Covered
+Concept	Explanation
+Greedy Method	Picks the most beneficial item first (locally optimal) expecting global optimum.
+Fractional Knapsack Problem	Items can be divided; maximize total value without exceeding capacity.
+Time Complexity	Sorting O(n log n) + Linear selection O(n) ⇒ O(n log n)
+Space Complexity	O(n) for storing supply list.
+Algorithm Steps	1️⃣ Sort by value/weight 2️⃣ Pick until capacity full 3️⃣ Handle fractional items
+Execution Time Measurement	Shows performance for practical analysis.
+
+🧠 DAA (Design and Analysis of Algorithms) Concepts in the Program
+________________________________________
+🔹 1. Greedy Method
+Concept:
+	A problem-solving paradigm that builds up a solution piece by piece.
+	At each step, it chooses the locally optimal choice (the best option at that moment) with the hope that it leads to a global optimum solution.
+In this Program:
+	The algorithm selects the supply with the highest value per kilogram (value density) first.
+	It keeps picking the most valuable item until the boat’s capacity is full.
+Example:
+If items have:
+Item	Weight	Value	Value/Weight
+Food	10	60	6
+Medicine	20	100	5
+Water	30	120	4
+→ The algorithm first picks Food, then Medicine, then Water (in that order).
+________________________________________
+🔹 2. Fractional Knapsack Problem
+Problem Definition:
+	Given n items with weights w[i] and values v[i], and a knapsack (boat) of capacity W,
+select items to maximize total value without exceeding weight W.
+	Items can be divided (fractions allowed).
+Mathematical Formula:
+Maximize
+∑(x_i×v_i)
+
+Subject to
+∑(x_i×w_i)≤W,0≤x_i≤1
+
+where x_i = fraction of the item included.
+In Program:
+	For divisible items, the algorithm loads fractional amounts.
+	For non-divisible items, it loads full or skips (similar to 0/1 Knapsack).
+________________________________________
+🔹 3. Greedy Choice Property
+	The local optimal (highest value/kg) choice at each step leads to the global optimum.
+	The Fractional Knapsack problem satisfies this property, so a greedy method works perfectly.
+________________________________________
+🔹 4. Optimal Substructure Property
+	An optimal solution to the problem contains optimal solutions to its subproblems.
+Example:
+After picking the most valuable item, the remaining problem (reduced capacity) is again a smaller instance of the same problem.
+________________________________________
+🔹 5. Algorithm Steps (DAA Form)
+Step	Description
+Step 1	Input item list with weights and values
+Step 2	Compute value/weight ratio for each
+Step 3	Sort items in descending order of ratio
+Step 4	Initialize totalValue = 0, remainingCapacity = W
+Step 5	For each item: 
+if divisible → take fraction; else → take if fits
+Step 6	Stop when capacity is full
+Step 7	Output total value
+________________________________________
+🔹 6. Complexity Analysis
+Type	Explanation	Result
+Time Complexity	Sorting takes O(n log n), and traversal O(n)	O(n log n)
+Space Complexity	Storing items in list	O(n)
+Best Case	Boat capacity large enough for all items	O(n log n)
+Worst Case	Only fractional parts chosen (still O(n log n))	O(n log n)
+________________________________________
+🔹 7. Algorithm Design Paradigm
+✅ Greedy Algorithm
+	Independent decisions based on value/weight ratio.
+	Unlike Dynamic Programming (used in 0/1 Knapsack), it doesn’t explore all combinations.
+________________________________________
+🔹 8. Correctness Proof
+Why Greedy Works for Fractional Knapsack:
+	Because taking a higher value/weight ratio item never reduces the total possible value.
+	Mathematically proven by exchange argument — swapping items of lower ratio never gives better result.
+________________________________________
+🔹 9. DAA Concepts Used Summarized
+Concept	Meaning	Applied In
+Greedy Method	Select best option locally	Sorting and selection
+Fractional Knapsack	Fractional selection allowed	Relief loading
+Greedy Choice Property	Locally optimal → Globally optimal	Highest value/kg selection
+Optimal Substructure	Smaller subproblem exists	Reduced capacity problem
+Time Complexity	Steps to compute result	O(n log n)
+Space Complexity	Memory used	O(n)
+Algorithm Efficiency	Based on time/space	Efficient for large n
+________________________________________
+🎯 DAA Viva Questions and Answers
+These are frequently asked practical viva questions for Greedy / Fractional Knapsack-based programs:
+________________________________________
+Q1. What is the type of algorithm used in this program?
+A: It uses the Greedy Method, which selects items based on the highest value per kilogram ratio at every step.
+________________________________________
+Q2. Which DAA problem does this code solve?
+A: The Fractional Knapsack Problem, where items can be divided into fractions to maximize total value.
+________________________________________
+Q3. Why can we use Greedy for fractional knapsack but not for 0/1 knapsack?
+A:
+Because in fractional knapsack, taking the locally best (highest value density) is always optimal.
+In 0/1 knapsack, that’s not true — a smaller high-value item might yield better total results. Hence, 0/1 knapsack needs Dynamic Programming.
+________________________________________
+Q4. What is the time complexity of your algorithm?
+A:
+Sorting items → O(n log n)
+Selecting items → O(n)
+✅ Overall = O(n log n).
+________________________________________
+Q5. What is the space complexity?
+A:
+We store all items in an ArrayList, so O(n).
+________________________________________
+Q6. What is the greedy criterion used here?
+A:
+Select the item with the maximum value/weight ratio (value density) first.
+________________________________________
+Q7. What are the two main properties needed for a greedy algorithm to work correctly?
+A:
+	Greedy Choice Property
+	Optimal Substructure Property
+________________________________________
+Q8. What is the difference between greedy and dynamic programming?
+Feature	Greedy	Dynamic Programming
+Choice	Local Optimal	Global Optimal
+Backtracking	No	Yes
+Problems Solved	Fractional Knapsack, Huffman	0/1 Knapsack, Floyd–Warshall
+Time	Faster	Slower
+Example	Fractional Knapsack	0/1 Knapsack
+________________________________________
+Q9. How does your code handle divisible and non-divisible items?
+A:
+	If divisible → takes only the fraction that fits.
+	If non-divisible → takes full item if it fits, else skips it.
+________________________________________
+Q10. What happens if all items are non-divisible?
+A:
+It behaves like a 0/1 knapsack (no fractional loading).
+________________________________________
+Q11. What happens if the boat capacity is smaller than the smallest item?
+A:
+If the item is divisible, a fraction is taken.
+If not, it’s skipped.
+________________________________________
+Q12. What is the output of your program?
+A:
+It displays:
+	Total utility value gained
+	Remaining boat capacity
+	Execution time
+________________________________________
+Q13. How do you measure execution time in your code?
+A:
+Using:
+long startTime = System.nanoTime();
+long endTime = System.nanoTime();
+double execTime = (endTime - startTime) / 1_000_000.0;
+This gives the time in milliseconds.
+________________________________________
+Q14. What is the data structure used and why?
+A:
+Used ArrayList because it allows:
+	Dynamic resizing
+	Easy sorting using sort() and lambdas
+	Sequential access (needed for greedy iteration)
+________________________________________
+Q15. What will happen if you remove sorting from your code?
+A:
+The algorithm will fail to pick optimal items because the order of selection will not be by value density, breaking the greedy logic.
+________________________________________
+Q16. What is the base condition of your algorithm?
+A:
+The algorithm stops when:
+remainingCapacity <= 0
+i.e., the boat is full.
+________________________________________
+Q17. What is the significance of using double instead of int?
+A:
+To handle fractional weights and values, since items can be partially selected.
+________________________________________
+Q18. What is the real-world significance of this problem?
+A:
+It models resource optimization problems such as:
+	Relief supply loading
+	Cargo transport optimization
+	Investment selection
+	Cloud resource allocation
+________________________________________
+Q19. What kind of problem-solving approach is Greedy?
+A:
+It is a top-down approach — makes decisions step by step from the start towards the final solution.
+________________________________________
+Q20. What is the difference between Greedy and Divide & Conquer?
+Greedy	Divide & Conquer
+Builds solution step-by-step	Divides problem into subproblems
+Makes one choice at a time	Solves recursively and combines
+Eg: Fractional Knapsack	Eg: Merge Sort, Quick Sort
+________________________________________
+🧩 Bonus: DAA Practical Tip Sheet
+DAA Concept	In This Program
+Algorithm Type	Greedy
+Problem Type	Fractional Knapsack
+Objective	Maximize total value
+Constraint	Capacity ≤ W
+Criterion	Highest value/weight ratio
+Input Type	Dynamic user input
+Output Type	Total value, Remaining weight
+Time Complexity	O(n log n)
+Space Complexity	O(n)
+Performance Metric	Execution Time in ms
+
+⚙️ COMPLETE EXECUTION FLOW — FROM INPUT → PROCESSING → OUTPUT
+________________________________________
+🟩 1️⃣ Program Start
+	Execution begins from:
+	public static void main(String[] args)
+	The main() function is the entry point of every Java program.
+________________________________________
+🟩 2️⃣ Scanner Object Creation
+Scanner sc = new Scanner(System.in);
+	Creates a Scanner object named sc to take user input from the keyboard.
+	System.in refers to the standard input stream.
+________________________________________
+🟩 3️⃣ Program Introduction
+System.out.println("Emergency Relief Supply Distribution");
+System.out.println();
+	Prints title and an empty line for user interface readability.
+________________________________________
+🟩 4️⃣ Input: Total Number of Items
+System.out.print("Enter the number of supply items: ");
+int totalItems = sc.nextInt();
+sc.nextLine();
+	Takes the total number of supply items user wants to enter.
+	sc.nextLine() is used to consume the newline left by nextInt() (a common Java input handling step).
+✅ DAA Concept: Input initialization — defining problem size n.
+________________________________________
+🟩 5️⃣ Validation: Check if Total Items > 0
+if (totalItems <= 0) {
+    System.out.println("No items were entered. The process has been stopped.");
+    sc.close();
+    return;
+}
+	Prevents invalid input (0 or negative items).
+	If invalid, program terminates early using return.
+✅ Concept Used: Input validation and boundary check.
+________________________________________
+🟩 6️⃣ Initialize Dynamic List of Supplies
+List<Supply> supplies = new ArrayList<>();
+	Creates a dynamic list (ArrayList) to hold all Supply objects.
+	Each object will store one item’s details (name, weight, value, divisibility).
+✅ Java Concept: Object-Oriented Programming (class + list).
+✅ DAA Concept: Dynamic data structure for storing inputs.
+________________________________________
+🟩 7️⃣ Iterative Input Loop for Each Item
+for (int i = 0; i < totalItems; i++) {
+    System.out.println("Enter details for item " + (i + 1) + ":");
+	Loops totalItems times to gather data of each supply item.
+________________________________________
+🔸 Input 1 — Item Name
+System.out.print("Item name: ");
+String name = sc.nextLine();
+	Takes string input for item name.
+________________________________________
+🔸 Input 2 — Item Weight
+System.out.print("Weight in kilograms: ");
+double weight = sc.nextDouble();
+	Takes decimal weight (double type allows fractional weights).
+✅ Validation:
+if (weight <= 0) {
+    System.out.println("Weight must be greater than zero. Exiting...");
+    sc.close();
+    return;
+}
+________________________________________
+🔸 Input 3 — Utility Value
+System.out.print("Utility value (importance): ");
+double value = sc.nextDouble();
+	Takes value (importance) of that item.
+	Validation ensures no negative values.
+________________________________________
+🔸 Input 4 — Divisibility
+System.out.print("Is this item divisible? (1 for Yes, 0 for No): ");
+boolean divisible = sc.nextInt() == 1;
+sc.nextLine();
+	Converts integer (1 or 0) to boolean (true or false).
+________________________________________
+🔸 Create and Store Item Object
+supplies.add(new Supply(name, weight, value, divisible));
+	Creates a new Supply object.
+	Adds it to the supplies list.
+✅ Java Concept: Object Creation using Constructor.
+✅ DAA Concept: Each item represents an element in the problem set.
+________________________________________
+🟩 8️⃣ Input: Boat Capacity
+System.out.print("Enter the boat capacity in kilograms: ");
+double maxCapacity = sc.nextDouble();
+	Takes total weight capacity of the relief boat.
+	Validates to ensure positive input.
+________________________________________
+🟩 9️⃣ Record Start Time
+long startTime = System.nanoTime();
+	Marks the starting time to later calculate algorithm execution duration.
+✅ DAA Concept: Used to evaluate time complexity practically.
+________________________________________
+🟩 🔟 Sorting Supplies by Value per Kg
+supplies.sort((a, b) -> Double.compare(b.valuePerKg(), a.valuePerKg()));
+Explanation:
+	Sorts list in descending order of valuePerKg() (value/weight ratio).
+	valuePerKg() is a method from Supply class:
+	double valuePerKg() {
+	    return itemValue / itemWeight;
+	}
+✅ DAA Concept:
+This is the Greedy Choice Property — always choose the item with maximum value per kg first.
+✅ Java Concept:
+Lambda Expression used for custom sorting.
+________________________________________
+🟩 11️⃣ Initialize Result Variables
+double totalValue = 0.0;
+double remainingCapacity = maxCapacity;
+	totalValue: total utility gained.
+	remainingCapacity: how much weight the boat can still take.
+________________________________________
+🟩 12️⃣ Iterate Over Sorted Items
+for (Supply s : supplies) {
+    if (remainingCapacity <= 0) break;
+	Loop through each supply (starting from the highest value density).
+	Break when boat is full.
+✅ DAA Concept: Iterative selection until constraint satisfied.
+________________________________________
+🔸 Case 1 — Divisible Item
+if (s.isDivisible) {
+    double loadWeight = Math.min(s.itemWeight, remainingCapacity);
+    double loadValue = s.valuePerKg() * loadWeight;
+    totalValue += loadValue;
+    remainingCapacity -= loadWeight;
+What happens here:
+	If item is divisible, we can take a fraction of it.
+	Take as much as fits (Math.min ensures we don’t exceed capacity).
+	Calculate partial value = (value/kg) × (amount taken).
+	Update total value and remaining capacity.
+✅ DAA Concept:
+This is the fractional knapsack step — partial selection allowed.
+________________________________________
+🔸 Case 2 — Non-divisible Item
+} else {
+    if (s.itemWeight <= remainingCapacity) {
+        totalValue += s.itemValue;
+        remainingCapacity -= s.itemWeight;
+    } else {
+        System.out.println("Skipped " + s.itemName + " because it is too heavy for the remaining space.");
+    }
+}
+What happens here:
+	If item is non-divisible:
+	Take full item if it fits.
+	Skip if it doesn’t fit.
+✅ DAA Concept:
+Acts like 0/1 Knapsack selection — either take whole or none.
+________________________________________
+🟩 13️⃣ Loop Ends
+	After iterating through all supplies (or when capacity full):
+	totalValue = total utility gained
+	remainingCapacity = unused space
+________________________________________
+🟩 14️⃣ Display Results
+System.out.println("Total utility value carried: " + totalValue);
+System.out.println("Remaining boat capacity: " + remainingCapacity + " kg");
+✅ Output Meaning:
+	Shows the maximum total value achieved using Greedy strategy.
+	Shows how much capacity is left unused (if any).
+________________________________________
+🟩 15️⃣ Calculate Execution Time
+long endTime = System.nanoTime();
+double execTime = (endTime - startTime) / 1_000_000.0;
+System.out.println("Execution time: " + execTime + " milliseconds");
+	Calculates total time taken by algorithm.
+	Converts nanoseconds to milliseconds.
+✅ DAA Concept: Time Complexity measurement through practical execution.
+________________________________________
+🟩 16️⃣ Final Message and Cleanup
+System.out.println("Relief supplies are ready to be delivered.");
+sc.close();
+	Displays final message.
+	Closes scanner to release resources.
+________________________________________
+⚡️ COMPLETE FLOW SUMMARY (Step-by-Step Path)
+Step	Operation	DAA Concept	Java Concept
+1	Start program	-	main() entry point
+2	Input number of items	-	Scanner input
+3	Validate input	-	Conditional check
+4	Store all supplies	-	ArrayList + Object creation
+5	Input boat capacity	-	User input
+6	Sort supplies by value/weight	Greedy choice property	Lambda sort
+7	Initialize total value and capacity	Initialization	Variable declaration
+8	Iterate supplies	Iteration	For-each loop
+9	Take full or fractional item	Fractional Knapsack	Math.min()
+10	Stop when full	Termination condition	break statement
+11	Print total value, remaining capacity	Output	System.out.println()
+12	Measure execution time	Time complexity	System.nanoTime()
+13	End program	-	sc.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROBLEM STATEMENT 6:
+🧠 DAA Concepts Used
+Concept	Explanation
+Dynamic Programming (DP)	Solves overlapping subproblems by storing results in dp[][].
+0/1 Knapsack Problem	Choose or skip each item under capacity constraint.
+Memoization	Stores subproblem results (dp[n][W]) to avoid recomputation.
+Backtracking	Used in getSelectedItems() to reconstruct which items were chosen.
+Time Complexity	O(N * W) per truck — polynomial, efficient.
+Space Complexity	O(N * W) for DP table.
+Greedy vs DP	Greedy fails here; DP ensures optimal allocation.
+Multiple Knapsack Instances	Repeated DP runs for multiple trucks.
+Priority Handling	Adds real-world constraint via priorityMultiplier.
+
+🎯 Viva Questions (for practical exam)
+	What algorithm is implemented here?
+→ 0/1 Knapsack using Dynamic Programming.
+	Why do we use memoization?
+→ To avoid recomputation and reduce time complexity from exponential to polynomial.
+	What is the time and space complexity?
+→ Time: O(N × W), Space: O(N × W).
+	What is the difference between greedy and DP approach here?
+→ Greedy may fail; DP guarantees optimal selection.
+	Why is recursion used?
+→ For expressing the problem naturally in smaller subproblems.
+	Why are static variables used?
+→ dp[][] is shared among recursive calls.
+	How is real-life priority handled?
+→ By multiplying item value with a priority multiplier.
+	Why do we use System.nanoTime()?
+→ To measure precise algorithm execution time.
+	What are overlapping subproblems in Knapsack?
+→ Same (n, W) computed multiple times; memoization prevents it.
+	What happens if truck capacity < all items’ weights?
+→ No item can be selected; the program prints “No items could be allocated
+________________________________________
+🧠 Execution Flow (from Input → Output)
+________________________________________
+🟩 Step 1: Program Start
+public static void main(String[] args)
+	Execution begins from the main() method.
+	A Scanner object is created to take user input from the console.
+	Scanner sc = new Scanner(System.in);
+	The program prints the heading:
+=== Disaster Relief Resource Allocation (Enhanced) ===
+________________________________________
+🟩 Step 2: Input of Number of Items
+System.out.print("Enter total number of items: ");
+int n = sc.nextInt();
+sc.nextLine();
+	User enters total number of items (e.g., 4).
+	An array of Item objects is created:
+	Item[] items = new Item[n];
+Memory is now allocated for storing all items.
+________________________________________
+🟩 Step 3: Input Details for Each Item
+For every item i in loop for (int i=0; i<n; i++):
+	Name → String name = sc.nextLine();
+	Weight → int weight = sc.nextInt();
+	Utility Value → int value = sc.nextInt();
+	Priority Level (1 or 2) → int priorityLevel = sc.nextInt();
+	Calculate priority multiplier:
+	double priorityMultiplier = (priorityLevel == 2) ? 1.5 : 1.0;
+	High priority = ×1.5 value
+	Normal priority = ×1.0 value
+	Create an Item object:
+	items[i] = new Item(name, weight, value, priorityMultiplier);
+	Store item in the array.
+🧱 Example Input:
+| Item | Name | Weight | Value | Priority | Multiplier | Effective Value |
+|------|-------|---------|--------|------------|----------------|
+| 1 | Medicine | 5 | 50 | 2 | 1.5 | 75 |
+| 2 | Rice | 10 | 60 | 1 | 1.0 | 60 |
+| 3 | Water | 8 | 40 | 2 | 1.5 | 60 |
+| 4 | Tent | 15 | 90 | 1 | 1.0 | 90 |
+All items are now stored in memory.
+________________________________________
+🟩 Step 4: Truck Details Input
+Enter truck capacity (in kg): 20
+Enter number of trucks available: 2
+→ truckCapacity = 20, totalTrucks = 2.
+	These values define constraints for each Knapsack run.
+________________________________________
+🟩 Step 5: Initialize Lists and Timers
+List<Item> remainingItems = new ArrayList<>(Arrays.asList(items));
+int truckNumber = 1;
+double totalUtility = 0;
+long startTime = System.nanoTime();
+	remainingItems → dynamic list of items still not loaded.
+	truckNumber → starts with 1.
+	totalUtility → stores total combined utility of all trucks.
+	startTime → begins time measurement.
+________________________________________
+🟩 Step 6: Truck Allocation Loop Begins
+while (!remainingItems.isEmpty() && truckNumber <= totalTrucks)
+Loop runs until:
+	All items are delivered OR
+	Truck count limit is reached.
+________________________________________
+🟩 Step 7: Convert Remaining Items to Array
+Item[] currentItems = remainingItems.toArray(new Item[0]);
+	Converts the dynamic list to an array to pass to the DP function.
+________________________________________
+🟩 Step 8: Initialize DP Table
+dp = new int[currentItems.length + 1][truckCapacity + 1];
+for (int[] row : dp)
+    Arrays.fill(row, -1);
+	DP Table dp[n+1][W+1] initialized with -1.
+	Each dp[i][w] will hold the maximum achievable value using first i items and weight ≤ w.
+________________________________________
+🟩 Step 9: Call Knapsack Function
+int maxValue = knapsackMemo(currentItems, truckCapacity, currentItems.length);
+💡 Inside knapsackMemo():
+Base Cases:
+	If no items or no capacity: return 0.
+(if (n==0 || W==0) return 0;)
+If already solved:
+	Return stored value from dp.
+If current item too heavy:
+	Skip it.
+Otherwise:
+dp[n][W] = Math.max(
+    items[n-1].effectiveValue() + knapsackMemo(items, W - items[n-1].weight, n - 1),
+    knapsackMemo(items, W, n - 1)
+);
+It performs two recursive calls:
+	Include the item: Add its effective value + solve smaller subproblem (reduced weight).
+	Exclude the item: Skip it, keep same capacity.
+Each state is stored in dp[n][W] once.
+This reduces complexity from O(2ⁿ) (recursive brute-force)
+to O(n × W) (Dynamic Programming).
+________________________________________
+🟩 Step 10: Get Selected Items
+List<Item> selected = getSelectedItems(currentItems, truckCapacity, currentItems.length);
+Inside getSelectedItems():
+Backtracking through DP table:
+while (n > 0 && W > 0) {
+    if (dp[n][W] != dp[n-1][W]) {
+        selected.add(items[n-1]);
+        W -= items[n-1].weight;
+    }
+    n--;
+}
+	Compares dp[n][W] and dp[n-1][W]:
+	If different → the nth item was included.
+	Reduce weight accordingly and add to selected list.
+✅ Result: You get the exact set of items that maximize utility for the given truck.
+________________________________________
+🟩 Step 11: Print Loaded Items for This Truck
+for (Item it : selected) {
+    System.out.println(" - " + it.name + " | Weight: " + it.weight +
+                       " | Utility: " + it.value +
+                       " | Priority Multiplier: " + it.priorityMultiplier);
+    usedWeight += it.weight;
+    totalUtility += it.effectiveValue();
+}
+Example Output:
+Items loaded into Truck 1:
+ - Medicine | Weight: 5 | Utility: 50 | Priority Multiplier: 1.5
+ - Water | Weight: 8 | Utility: 40 | Priority Multiplier: 1.5
+ - Rice | Weight: 10 | Utility: 60 | Priority Multiplier: 1.0
+Used Weight: 5 + 8 + 10 = 23 (if capacity 20 → last one may be skipped)
+Utility: Sum of effective values.
+________________________________________
+🟩 Step 12: Remove Loaded Items
+remainingItems.removeAll(selected);
+truckNumber++;
+	Removes already allocated items from the remaining list.
+	Moves to next truck.
+________________________________________
+🟩 Step 13: Second Truck Iteration
+	Same process repeats for Truck 2 with leftover items (e.g., Tent).
+	DP runs again for those remaining items.
+________________________________________
+🟩 Step 14: End Timing
+long endTime = System.nanoTime();
+double execTime = (endTime - startTime) / 1_000_000.0;
+	Calculates total execution time in milliseconds.
+	Useful to analyze time complexity performance practically.
+________________________________________
+🟩 Step 15: Final Output
+System.out.println("All truck allocations completed.");
+System.out.println("Total Combined Utility Value: " + totalUtility);
+System.out.printf("Algorithm Execution Time: %.3f ms\n", execTime);
+Example Final Output:
+-------------------------------------------
+All truck allocations completed.
+Total Combined Utility Value (considering priority): 215.0
+Algorithm Execution Time: 1.234 ms
+-------------------------------------------
+________________________________________
+⚙️ Internal Data Flow (Simplified View)
+Stage	Data Structure	Operation
+Input	Scanner	Reads item info, truck capacity
+Storage	Item[]	Stores objects with attributes
+Conversion	remainingItems.toArray()	Converts list to array for DP
+DP Table	int dp[n+1][W+1]	Stores optimal values
+Recursion	knapsackMemo()	Computes maximum utility
+Backtrack	getSelectedItems()	Finds actual chosen items
+Output	Console	Displays truck allocations, weights, total utility, execution time
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROBLEM STATEMENT 2:
+🧠 DAA CONCEPTS USED
+Concept	Description
+Divide and Conquer	Divide array by pivot, conquer each side recursively.
+Recursion	QuickSort calls itself until subarray size ≤ 1.
+In-place sorting	Uses same memory (O(1) space).
+Best Case	O(n log n) when pivot divides array evenly.
+Worst Case	O(n²) when pivot divides unevenly.
+Average Case	O(n log n) (common in practical data).
+Space Complexity	O(log n) (recursive stack).
+Pivot Type	Middle element for better balance.
+Stability	Not stable (equal elements may swap).
+
+🎤 VIVA QUESTIONS & ANSWERS
+Question	Short Answer
+What algorithm is used here?	QuickSort (Divide and Conquer).
+What is the pivot element?	The middle element of the current subarray.
+Why middle pivot?	Reduces risk of unbalanced partitions → better performance.
+What is the time complexity?	O(n log n) average, O(n²) worst.
+What is the space complexity?	O(log n).
+Is QuickSort stable?	No, because equal elements can change order.
+Is QuickSort in-place?	Yes, uses O(1) extra space for partitioning.
+Why use System.nanoTime()?	To measure algorithm execution time precisely.
+What happens if array is already sorted?	It may lead to unbalanced recursion → worst-case O(n²).
+
+⚙️ COMPLETE EXECUTION FLOW (From Input → Output)
+________________________________________
+🧩 Step 1: Program Starts
+Execution begins from the main() method.
+public static void main(String[] args) {
+The Java Virtual Machine (JVM) loads the class QuickSort, and the control enters the main() function.
+________________________________________
+📥 Step 2: User Input — CSV File Path
+Scanner sc = new Scanner(System.in);
+System.out.print("Enter CSV file path: ");
+String path = sc.nextLine();
+➤ What happens:
+	The program displays:
+	Enter CSV file path:
+	User enters the full path of the CSV file, e.g.
+	C:\Users\Kinjal\Documents\movies.csv
+	The variable path now stores this location.
+________________________________________
+📄 Step 3: Read and Count Number of Records
+BufferedReader br = new BufferedReader(new FileReader(path));
+String line; boolean first = true;
+while ((line = br.readLine()) != null) {
+    if (first) { first = false; continue; }  // Skip header
+    if (!line.trim().isEmpty()) n++;
+}
+➤ What happens:
+	The program opens the CSV file.
+	Reads each line using BufferedReader.
+	Skips the header line (first line).
+	Increments counter n for each valid record line.
+✅ Example:
+If your CSV is:
+Title,Rating,Year,WatchCount
+A,4.5,2020,500
+B,3.2,2018,300
+C,5.0,2022,800
+D,2.8,2017,250
+E,4.0,2019,450
+Then:
+	Total lines = 6 (including header)
+	Records (n) = 5
+So now: n = 5
+________________________________________
+🧠 Step 4: Initialize Arrays
+title = new String[n];
+rating = new double[n];
+year = new int[n];
+watchCount = new int[n];
+Memory allocation:
+title[]        = {"", "", "", "", ""}
+rating[]       = {0.0, 0.0, 0.0, 0.0, 0.0}
+year[]         = {0, 0, 0, 0, 0}
+watchCount[]   = {0, 0, 0, 0, 0}
+Arrays are empty initially — waiting to be filled.
+________________________________________
+📚 Step 5: Load Data from CSV into Arrays
+while ((line = br.readLine()) != null) {
+    if (first) { first = false; continue; }
+    String[] p = line.split(",");
+    title[i] = p[0].trim();
+    rating[i] = Double.parseDouble(p[1].trim());
+    year[i] = Integer.parseInt(p[2].trim());
+    watchCount[i] = Integer.parseInt(p[3].trim());
+    i++;
+}
+➤ What happens:
+Each line (except header) is split by commas:
+	Example line: "A,4.5,2020,500"
+	p[0] = "A"
+	p[1] = "4.5"
+	p[2] = "2020"
+	p[3] = "500"
+These are stored in their respective arrays.
+✅ After reading all 5 records:
+Index	title	rating	year	watchCount
+0	A	4.5	2020	500
+1	B	3.2	2018	300
+2	C	5.0	2022	800
+3	D	2.8	2017	250
+4	E	4.0	2019	450
+________________________________________
+🧠 Step 6: User Chooses Sorting Attribute
+System.out.print("Sort by (rating/year/watchcount): ");
+String c = sc.next().toLowerCase();
+➤ Example:
+User enters:
+rating
+Now c = "rating"
+The program will use rating[] for comparison in QuickSort.
+________________________________________
+📊 Step 7: Display Before Sorting
+display(n);
+Output:
+Before Sorting:
+A | Rating: 4.5 | Year: 2020 | WatchCount: 500
+B | Rating: 3.2 | Year: 2018 | WatchCount: 300
+C | Rating: 5.0 | Year: 2022 | WatchCount: 800
+D | Rating: 2.8 | Year: 2017 | WatchCount: 250
+E | Rating: 4.0 | Year: 2019 | WatchCount: 450
+________________________________________
+⚙️ Step 8: QuickSort Begins
+quickSort(0, n - 1, c);
+→ i.e. quickSort(0, 4, "rating")
+________________________________________
+🔹 Recursion Level 1 (Full Array: index 0–4)
+	low = 0, high = 4
+	mid = (0 + 4) / 2 = 2
+	pivot = rating[2] = 5.0 (C’s rating)
+Now array is divided conceptually around pivot = 5.0
+Step	Comparison	Action
+rating[0] = 4.5 < 5.0	Move i → 1	
+rating[1] = 3.2 < 5.0	Move i → 2	
+rating[4] = 4.0 < 5.0	Move i → 3	
+rating[3] = 2.8 < 5.0	Move i → 4	
+➡️ Eventually, all elements < pivot
+✅ C (pivot) stays at last position → Array now divided into:
+	Left part: ratings < 5.0 (A, B, D, E)
+	Right part: empty
+Recursive calls:
+quickSort(0, 3, "rating")
+quickSort(4, 4, "rating")
+(second call stops immediately since low >= high)
+________________________________________
+🔹 Recursion Level 2 (Subarray index 0–3)
+	low = 0, high = 3
+	mid = (0 + 3)/2 = 1
+	pivot = rating[1] = 3.2 (B’s rating)
+Compare elements with 3.2:
+Index	rating	Compare	Result
+0	4.5	> pivot	move j left
+3	2.8	< pivot	move i right
+Swap i=0, j=3 → Swap A and D.			
+Array now:
+D(2.8), B(3.2), C(5.0), A(4.5), E(4.0)
+Recursion continues:
+quickSort(0, 0, "rating")  // left side
+quickSort(2, 3, "rating")  // right side
+________________________________________
+🔹 Recursion Level 3 (Subarray index 2–3)
+	mid = (2 + 3)/2 = 2
+	pivot = rating[2] = 5.0
+Since all elements < 5.0 except pivot, recursion ends.
+________________________________________
+✅ Final Sorted Order (By Rating Ascending):
+Title	Rating	Year	WatchCount
+D	2.8	2017	250
+B	3.2	2018	300
+E	4.0	2019	450
+A	4.5	2020	500
+C	5.0	2022	800
+________________________________________
+🖨️ Step 9: Display Sorted Data
+After Sorting by RATING:
+D | Rating: 2.8 | Year: 2017 | WatchCount: 250
+B | Rating: 3.2 | Year: 2018 | WatchCount: 300
+E | Rating: 4.0 | Year: 2019 | WatchCount: 450
+A | Rating: 4.5 | Year: 2020 | WatchCount: 500
+C | Rating: 5.0 | Year: 2022 | WatchCount: 800
+________________________________________
+⏱️ Step 10: Execution Time Calculation
+long start = System.nanoTime();
+...
+long end = System.nanoTime();
+System.out.printf("Time Taken: %.3f ms", (end - start) / 1_000_000.0);
+Example Output:
+Time Taken: 0.038 ms
+✅ Purpose: Measures algorithm’s performance experimentally.
+________________________________________
+🧠 DAA CONCEPTS IN FLOW
+Concept	Example in Program	Purpose
+Divide and Conquer	Split array around pivot	Efficient sorting
+Recursion	quickSort() calling itself	Sort subarrays
+In-place sorting	swap() modifies same array	Space-efficient
+Pivot (Middle element)	pivot = rating[mid]	Balances partitions
+Time Complexity	O(n log n) average	Fast on random data
+Space Complexity	O(log n)	Recursion stack only
+Worst Case	O(n²)	If pivot divides poorly
+Not Stable	Equal elements may reorder	Trade-off for speed
+
+
+
+
+
+
+PROBLEM STATEMENT 1:
+🧮 DAA CONCEPT SUMMARY
+Concept	Explanation
+Algorithm Design Technique	Divide and Conquer
+Steps	Divide → Sort → Merge
+Recurrence Relation	T(n) = 2T(n/2) + O(n)
+Time Complexity	O(n log n) (Best, Avg, Worst)
+Space Complexity	O(n) (extra temp list)
+Stability	Stable
+Type	Recursive, Comparison-based Sorting
+Applications	Sorting large datasets, external sorting, file-based data
+
+🧮 DAA CONCEPT SUMMARY
+Concept	Explanation
+Algorithm Design Technique	Divide and Conquer
+Steps	Divide → Sort → Merge
+Recurrence Relation	T(n) = 2T(n/2) + O(n)
+Time Complexity	O(n log n) (Best, Avg, Worst)
+Space Complexity	O(n) (extra temp list)
+Stability	Stable
+Type	Recursive, Comparison-based Sorting
+Applications	Sorting large datasets, external sorting, file-based data
+________________________________________
+💬 VIVA QUESTIONS (with Answers)
+	Q: What design strategy does Merge Sort use?
+A: Divide and Conquer.
+	Q: What is the time complexity of Merge Sort?
+A: O(n log n) in all cases.
+	Q: Is Merge Sort stable?
+A: Yes, it maintains the relative order of equal elements.
+	Q: What is the auxiliary space used by Merge Sort?
+A: O(n), due to the temporary array.
+	Q: How is recursion used here?
+A: The array is divided recursively until one element remains, then merged back.
+	Q: Why not use Quick Sort here?
+A: Merge Sort is preferred for large datasets and stable sorting when input is from external storage.
+	Q: What is the purpose of measuring time?
+A: To analyze algorithm efficiency practically.
+	Q: What is the function of BufferedReader?
+A: It reads the file efficiently line by line.
+
+
+🧭 COMPLETE EXECUTION FLOW (Step-by-Step)
+________________________________________
+🪜 PHASE 1: PROGRAM START & INPUT
+🔹 Step 1 — Program Execution Begins
+public static void main(String[] args) {
+	The JVM starts program execution from the main() method.
+	Memory allocation: Stack frame created for main().
+________________________________________
+🔹 Step 2 — Input Prompt
+Scanner sc = new Scanner(System.in);
+System.out.println("📦 Customer Order Sorting using Merge Sort");
+System.out.print("Enter full CSV file path: ");
+String path = sc.nextLine();
+	Scanner object created for user input.
+	User sees a message:
+	📦 Customer Order Sorting using Merge Sort
+	Enter full CSV file path (e.g., C:\\Users\\Kinjal\\Desktop\\orders.csv):
+	User types:
+	C:\Users\Kinjal\Desktop\orders.csv
+	That file path is stored in variable path.
+📘 Java Concept: Input handling using Scanner.
+🧠 DAA Role: Not algorithmic — this step prepares the input dataset.
+________________________________________
+🧾 PHASE 2: READING DATA FROM CSV
+🔹 Step 3 — Initialize Storage
+List<OrderRecord> orders = new ArrayList<>();
+	Creates a dynamic list to store all order records.
+📘 Java Concept:
+ArrayList is used for dynamic data storage.
+________________________________________
+🔹 Step 4 — Open File and Read Line by Line
+try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+    String line;
+    boolean header = true;
+    while ((line = br.readLine()) != null) {
+        ...
+    }
+}
+	BufferedReader opens the file from the given path.
+	Reads each line until the file ends (null).
+	header variable skips the first line (usually column names).
+Example file content:
+OrderCode,Time
+ORD001,1709874567000
+ORD002,1709800000000
+ORD003,1709900000000
+________________________________________
+🔹 Step 5 — Parse Each Line
+String[] parts = line.split(",");
+String code = parts[0].trim();
+long time = Long.parseLong(parts[1].trim());
+orders.add(new OrderRecord(code, time));
+For each line:
+	Split into two values (code, time).
+	Convert time from String → long.
+	Create a new OrderRecord object.
+	Add it to the orders list.
+Now, the list looks like:
+Index	Code	Time (ms)
+0	ORD001	1709874567000
+1	ORD002	1709800000000
+2	ORD003	1709900000000
+📘 Java Concept: File I/O, String splitting, object creation.
+🧠 DAA Role: Preparing dataset (unsorted list of records).
+________________________________________
+⚙️ PHASE 3: VERIFY DATA AND START SORTING
+🔹 Step 6 — Data Validation
+if (orders.isEmpty()) {
+    System.out.println("⚠️ No valid data found in the file.");
+    return;
+}
+	Ensures data is loaded.
+	If list empty → program exits.
+________________________________________
+🔹 Step 7 — Display Count
+System.out.println("\nTotal Orders Loaded: " + orders.size());
+System.out.println("Sorting orders based on timestamp...");
+Sample output:
+Total Orders Loaded: 3
+Sorting orders based on timestamp...
+________________________________________
+🧮 PHASE 4: MERGE SORT ALGORITHM EXECUTION
+🔹 Step 8 — Start Timer
+long start = System.currentTimeMillis();
+	Records system time (in milliseconds) before sorting begins.
+________________________________________
+🔹 Step 9 — Call Recursive Merge Sort
+mergeSort(orders, 0, orders.size() - 1);
+This triggers recursive division of the list.
+Let’s trace what happens internally 👇
+________________________________________
+🔁 PHASE 5: RECURSIVE DIVIDE AND MERGE (Step-by-Step)
+Assume:
+Indexes: 0, 1, 2
+Orders: [ORD001 (1709874...), ORD002 (1709800...), ORD003 (1709900...)]
+________________________________________
+🧩 Step 9.1 — First Call
+mergeSort(list, 0, 2)
+	mid = (0+2)/2 = 1
+	→ Calls mergeSort(list, 0, 1)
+	→ Calls mergeSort(list, 2, 2)
+Now recursion branches like this:
+mergeSort(0,2)
+ ├─ mergeSort(0,1)
+ │   ├─ mergeSort(0,0)
+ │   └─ mergeSort(1,1)
+ │   └─ merge(0,0,1)
+ └─ mergeSort(2,2)
+ └─ merge(0,1,2)
+________________________________________
+🧩 Step 9.2 — Base Case
+mergeSort(list, 0, 0)
+mergeSort(list, 1, 1)
+mergeSort(list, 2, 2)
+When left == right, recursion stops (single element is already sorted).
+🧠 DAA Concept: Base case of recursion ensures termination.
+________________________________________
+🧩 Step 9.3 — Merge Phase
+Now it starts combining:
+(a) merge(list, 0, 0, 1)
+Compare ORD001 and ORD002 times:
+	ORD002.time < ORD001.time
+	So merge result → [ORD002, ORD001]
+(b) merge(list, 0, 1, 2)
+Compare [ORD002, ORD001] with ORD003
+→ Final sorted order by time:
+[ORD002, ORD001, ORD003]
+🧠 DAA Concepts:
+	Merging step: Linear O(n)
+	Recurrence relation: T(n) = 2T(n/2) + O(n)
+	Overall complexity: O(n log n)
+	Stable sort: Relative order maintained if equal times.
+📘 Java Concepts:
+	Dynamic list manipulation using ArrayList.
+	Element comparison using if (list.get(i).time <= list.get(j).time).
+________________________________________
+🔹 Step 10 — End Timer
+long end = System.currentTimeMillis();
+	Captures time after sorting completes.
+	Time taken = end - start.
+________________________________________
+🔹 Step 11 — Display Sorting Time
+double sec = (end - start) / 1000.0;
+System.out.printf("\n✅ Sorting Complete in %.3f seconds\n", sec);
+Example output:
+✅ Sorting Complete in 0.002 seconds
+________________________________________
+🧾 PHASE 6: DISPLAY RESULTS
+🔹 Step 12 — Print First Few Sorted Orders
+System.out.println("\nFirst few sorted orders:");
+printOrders(orders, 10);
+Inside printOrders():
+SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+for (int i = 0; i < Math.min(count, list.size()); i++) {
+    String fTime = fmt.format(new Date(list.get(i).time));
+    System.out.println("Order: " + list.get(i).code + " | Time: " + fTime);
+}
+Converts timestamps → readable format.
+
+
+
+
+
+
+PROBLEM STATEMENT 5:
+🧭 EXECUTION FLOW SUMMARY
+INPUT:
+  Nodes, Stages, Edges, Source, Destination
+      ↓
+GRAPH CONSTRUCTION:
+  Build adjacency list (consecutive stages only)
+      ↓
+DYNAMIC PROGRAMMING:
+  Initialize dist[] & nextNode[]
+  Compute minimal cost backward from destination
+      ↓
+PATH RECONSTRUCTION:
+  Follow nextNode[] from source to destination
+      ↓
+OUTPUT:
+  Display route + time taken
+________________________________________
+🧠 CONCEPT SUMMARY TABLE
+Concept	Explanation
+Graph Representation	Adjacency List (List<List<Edge>>)
+Multistage Property	Edge only from Stage i → Stage i+1
+Dynamic Programming	Bottom-up computation of shortest path
+Optimal Substructure	dist[i] = min(cost(i→j) + dist[j])
+Infinity Concept	Represented by Integer.MAX_VALUE
+Time Complexity	O(V + E)
+Space Complexity	O(V)
+Java OOP	Encapsulation via Edge class
+Performance Measurement	System.nanoTime()
+Input Handling	Scanner class from java.util
+________________________________________
+🧾 10 Viva-Ready Questions (with crisp answers)
+No	Question	Answer
+1	What type of algorithm is this?	Dynamic Programming (Backward approach)
+2	What is a Multistage Graph?	A DAG where edges only go from one stage to the next consecutive stage.
+3	What is dist[i]?	The minimum cost from node i to destination.
+4	What is nextNode[i]?	The next node to go to from node i on the shortest route.
+5	Why do we fill dist[] with Integer.MAX_VALUE?	To represent infinity (unreachable nodes).
+6	What ensures multistage structure?	Stage validation (stageOf[v] - stageOf[u] == 1)
+7	What is the time complexity?	O(V + E)
+8	Why is DP efficient here?	It avoids recomputation by storing subproblem results.
+9	Why measure time with nanoTime()?	Gives precise algorithm execution time.
+10	Can this graph have backward edges?	No, because it’s a Directed Acyclic Multistage Graph.
+
+🚀 PROGRAM EXECUTION FLOW: From Input → Output
+🟢 STEP 1: Program Starts
+public static void main(String[] args)
+
+
+JVM starts execution here.
+
+main() acts as the entry point of every Java program.
+
+🟢 STEP 2: Scanner Object Created
+Scanner sc = new Scanner(System.in);
+
+
+Scanner is used to take keyboard input from the user.
+
+Java reads input stream (System.in) and parses it into integers.
+
+🟢 STEP 3: Welcome Message Printed
+System.out.println("=== SwiftCargo Logistics Route Optimization System ===");
+
+
+Displays title for the user to understand the context.
+
+🟢 STEP 4: Input — Number of Locations (Nodes)
+System.out.print("Enter total number of locations (nodes): ");
+int N = sc.nextInt();
+
+Example Input:
+6
+
+
+Meaning: There are 6 nodes (locations) in the logistics network, numbered 0 to 5.
+
+🟢 STEP 5: Input — Stage Index for Each Node
+int[] stageOf = new int[N];
+System.out.println("Enter stage index for each node (0 to number_of_stages-1):");
+for (int i = 0; i < N; i++) {
+    System.out.print("Stage of node " + i + ": ");
+    stageOf[i] = sc.nextInt();
+}
+
+Example Input:
+Stage of node 0: 0
+Stage of node 1: 1
+Stage of node 2: 1
+Stage of node 3: 2
+Stage of node 4: 2
+Stage of node 5: 3
+
+Node	Stage
+0	0
+1	1
+2	1
+3	2
+4	2
+5	3
+
+DAA Concept:
+The graph is divided into stages — edges must connect consecutive stages only (0→1, 1→2, 2→3).
+
+🟢 STEP 6: Create Adjacency List (Graph Structure)
+List<List<Edge>> graph = new ArrayList<>();
+for (int i = 0; i < N; i++) graph.add(new ArrayList<>());
+
+
+Resulting Data Structure:
+
+graph = [ [], [], [], [], [], [] ]
+
+
+Each node (0–5) has an empty list to store outgoing edges.
+
+DAA Concept:
+Graph represented using an Adjacency List —
+efficient for sparse networks (less memory than matrix).
+
+🟢 STEP 7: Input — Number of Routes (Edges)
+System.out.print("\nEnter number of possible routes (edges): ");
+int E = sc.nextInt();
+
+Example Input:
+8
+
+🟢 STEP 8: Input — Each Route (Edge)
+System.out.println("\nEnter each route as: <From> <To> <Cost>");
+for (int i = 0; i < E; i++) {
+    int u = sc.nextInt();
+    int v = sc.nextInt();
+    int cost = sc.nextInt();
+
+Example Input:
+0 1 2
+0 2 4
+1 3 7
+1 4 3
+2 3 2
+2 4 1
+3 5 1
+4 5 2
+
+
+Now the code validates whether each edge connects consecutive stages:
+
+if (stageOf[v] - stageOf[u] != 1) {
+    System.out.println("❌ Invalid edge! ...");
+    continue;
+}
+graph.get(u).add(new Edge(v, cost));
+
+
+✅ All edges above are valid (Stage i → Stage i+1).
+❌ If user entered 2 5 3, it would print:
+
+Invalid edge! Edge must connect nodes from consecutive stages (Stage 1 -> Stage 2)
+
+🟢 STEP 9: Constructed Graph in Memory
+
+After valid inputs, adjacency list looks like this:
+
+graph = [
+  [Edge(1,2), Edge(2,4)],   // From node 0
+  [Edge(3,7), Edge(4,3)],   // From node 1
+  [Edge(3,2), Edge(4,1)],   // From node 2
+  [Edge(5,1)],              // From node 3
+  [Edge(5,2)],              // From node 4
+  []                        // Node 5 (destination)
+]
+
+
+DAA Concept:
+Edges are directional, following the multistage constraint —
+making the graph a Directed Acyclic Graph (DAG).
+
+🟢 STEP 10: Input — Source and Destination Nodes
+System.out.print("\nEnter starting warehouse (source node): ");
+int source = sc.nextInt();
+System.out.print("Enter final delivery point (destination node): ");
+int destination = sc.nextInt();
+
+Example Input:
+Source: 0
+Destination: 5
+
+🟢 STEP 11: Measure Algorithm Execution Time
+long startTime = System.nanoTime();
+int[] nextNode = findShortestPath(graph, N, source, destination);
+long endTime = System.nanoTime();
+
+
+startTime = time before algorithm runs.
+
+endTime = time after completion.
+
+We now jump to the findShortestPath() function 👇
+
+🧮 INSIDE findShortestPath()
+Step A: Initialize Arrays
+int[] dist = new int[N];
+int[] nextNode = new int[N];
+Arrays.fill(dist, Integer.MAX_VALUE);
+Arrays.fill(nextNode, -1);
+dist[destination] = 0;
+
+
+Initial values:
+
+dist = [∞, ∞, ∞, ∞, ∞, 0]
+nextNode = [-1, -1, -1, -1, -1, -1]
+
+
+Meaning:
+
+Destination (node 5) has cost = 0.
+
+All others = unknown yet (∞).
+
+Step B: Backward Dynamic Programming Loop
+for (int i = N - 2; i >= 0; i--) {
+    for (Edge e : graph.get(i)) {
+        if (dist[e.to] != Integer.MAX_VALUE && e.cost + dist[e.to] < dist[i]) {
+            dist[i] = e.cost + dist[e.to];
+            nextNode[i] = e.to;
+        }
+    }
+}
+
+
+Let’s compute step by step 👇
+
+1️⃣ i = 4
+
+Edges: (4→5, cost=2)
+
+dist[4] = min(∞, 2 + dist[5]=2+0) = 2
+nextNode[4] = 5
+
+2️⃣ i = 3
+
+Edges: (3→5, cost=1)
+
+dist[3] = 1 + dist[5]=1
+nextNode[3] = 5
+
+3️⃣ i = 2
+
+Edges: (2→3,2), (2→4,1)
+
+via 3: 2 + 1 = 3
+
+via 4: 1 + 2 = 3
+Both same → picks first found.
+
+dist[2] = 3
+nextNode[2] = 3 (or 4 depending order)
+
+4️⃣ i = 1
+
+Edges: (1→3,7), (1→4,3)
+
+via 3: 7 + 1 = 8
+
+via 4: 3 + 2 = 5
+Choose 5.
+
+dist[1] = 5
+nextNode[1] = 4
+
+5️⃣ i = 0
+
+Edges: (0→1,2), (0→2,4)
+
+via 1: 2 + 5 = 7
+
+via 2: 4 + 3 = 7
+Pick 7 (both equal).
+
+dist[0] = 7
+nextNode[0] = 1
+
+Step C: Final DP Tables
+Node	dist[i] (Min Cost)	nextNode[i]
+0	7	1
+1	5	4
+2	3	3
+3	1	5
+4	2	5
+5	0	-1
+Step D: Return Path Data
+return nextNode;
+
+
+Control returns to main(), carrying the chain of next nodes.
+
+🧩 BACK TO MAIN()
+
+Now:
+
+nextNode = [1, 4, 3, 5, 5, -1]
+
+🟢 STEP 12: Display Route
+System.out.println("\nAnalyzing delivery routes...");
+displayRoute(source, destination, nextNode);
+
+
+Let’s enter displayRoute() 👇
+
+🗺️ INSIDE displayRoute()
+int node = source;
+System.out.print("Recommended delivery route: ");
+System.out.print(node);
+while (nextNode[node] != -1) {
+    node = nextNode[node];
+    System.out.print(" -> " + node);
+}
+
+
+Flow:
+
+Start from node = 0
+
+nextNode[0] = 1 → print “0 -> 1”
+
+nextNode[1] = 4 → print “1 -> 4”
+
+nextNode[4] = 5 → print “4 -> 5”
+
+nextNode[5] = -1 → stop.
+
+Output:
+
+Recommended delivery route: 0 -> 1 -> 4 -> 5
+
+Check Destination
+if (node != destination) {
+    System.out.println("⚠️  Warning: Destination node not reached.");
+}
+
+
+✅ Here, node == destination, so no warning.
+
+🔁 BACK TO MAIN AGAIN
+🟢 STEP 13: Print Confirmation and Time
+System.out.println("Route analysis completed successfully.");
+System.out.printf("Total computation time (algorithm only): %.3f milliseconds%n",
+        (endTime - startTime) / 1_000_000.0);
+System.out.println("SwiftCargo system has determined the most efficient delivery path.");
+
+
+Time Calculation:
+
+(endTime - startTime) / 1_000_000.0
+
+
+→ Converts nanoseconds → milliseconds.
+
+Example:
+
+Total computation time (algorithm only): 0.028 milliseconds
+
+🟢 STEP 14: Close Scanner and End
+sc.close();
+
+
+Releases system resources.
+
+🏁 FINAL OUTPUT ON SCREEN
+=== SwiftCargo Logistics Route Optimization System ===
+Enter total number of locations (nodes): 6
+Enter stage index for each node (0 to number_of_stages-1):
+Stage of node 0: 0
+Stage of node 1: 1
+Stage of node 2: 1
+Stage of node 3: 2
+Stage of node 4: 2
+Stage of node 5: 3
+
+Enter number of possible routes (edges): 8
+Enter each route as: <From> <To> <Cost>
+0 1 2
+0 2 4
+1 3 7
+1 4 3
+2 3 2
+2 4 1
+3 5 1
+4 5 2
+
+Enter starting warehouse (source node): 0
+Enter final delivery point (destination node): 5
+
+Analyzing delivery routes...
+Recommended delivery route: 0 -> 1 -> 4 -> 5
+Route analysis completed successfully.
+Total computation time (algorithm only): 0.028 milliseconds
+SwiftCargo system has determined the most efficient delivery path.
+
+⚙️ SUMMARY OF DATA FLOW
+Step	Description	Concept
+1	User inputs nodes & stages	Graph definition
+2	Edges added (validated by stage)	Directed acyclic structure
+3	findShortestPath() runs	Dynamic Programming
+4	dist[] computed backward	Optimal substructure
+5	nextNode[] built	Path reconstruction
+6	Path printed	Output route
+7	Time calculated	Performance measurement
+🧠 DAA CONCEPTS USED THROUGHOUT
+Concept	Explanation
+Dynamic Programming (DP)	Finds optimal route by solving subproblems (backward).
+Optimal Substructure	Each node’s min cost depends on the next stage’s min cost.
+Overlapping Subproblems	Avoided by bottom-up DP.
+Multistage Graph	Directed Acyclic Graph divided into stages.
+Adjacency List	Space-efficient graph representation.
+Infinity Initialization	Represent unreachable paths using Integer.MAX_VALUE.
+Time Complexity	O(V + E)
+Space Complexity	O(V)
